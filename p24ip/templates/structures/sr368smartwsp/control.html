@@ -1,0 +1,188 @@
+# -*- coding: utf-8 -*-
+<%inherit file="/base/base.html" />
+<%def name="head()" >
+    <script type="text/javascript" src="/media/ajax.js"></script>
+    <script type="text/javascript">
+		function submit(sensor_id,s_repl)
+		{
+			sensor_value = document.getElementById('s'+s_repl).value;
+			var xmlhttp = getXmlHttp();
+			xmlhttp.onreadystatechange=function()
+			{
+				if (xmlhttp.readyState==4) 
+				{
+					if (xmlhttp.responseText == 'OK')
+							alert('Ustawiono, poczekaj na odświeżenie');
+					else alert(xmlhttp.responseText);
+				}
+			}
+			var url="/device/sensors/control/ajax/?method=write&sid="+sensor_id+"&value="+sensor_value;
+			xmlhttp.open("GET",url,true);
+			xmlhttp.send(null);			
+
+			if ((s_repl == '1r4202') && (sensor_value=='0'))
+			{
+				var xat = getXmlHttp();
+				var urlx="/device/own/reset/";
+				xat.onreadystatechange=function()
+				{
+					if (xat.readyState==4)
+						if (xat.responseText == 'OK') 
+  						  setTimeout("window.location.reload()", 5000);
+				}
+				xat.open("GET",urlx,true);
+				xat.send(null);
+			}
+		}
+		
+		function control_update()
+		{
+			var xmlhttp = getXmlHttp();
+			xmlhttp.onreadystatechange=function()
+			{if (xmlhttp.readyState==4) 
+				{
+					if (xmlhttp.responseText.substring(0,1) == '[')
+					{
+						var s4202, s4201, s4205;
+						sensor_data = eval(xmlhttp.responseText);
+						for (sensor_key in sensor_data)
+						{
+							sensor = sensor_data[sensor_key];
+							sens_id = sensor[0];
+							if (sens_id == '1r4202') s4202 = sensor[1]; // godzina
+							if (sens_id == '1r4201') s4201 = sensor[1]; // minuta
+							if (sens_id == '1r4205') s4205 = sensor[1]; // ilosc zalaczen
+							if (document.getElementById('s'+sens_id).hasFocus != true)
+							{
+								document.getElementById('s'+sens_id).value = sensor[1];
+								document.getElementById('ss'+sens_id).innerHTML = sensor[2].substring(11);
+							}
+						}
+						
+						document.getElementById('alfa').value = Math.round(s4205 / (s4202 + (s4201 * 0.01666))*100)/100;
+						var last_resetted = Date.parse('${last_reset.strftime("%Y-%m-%d %H:%M")}') / 1000;
+						var now = new Date().getTime() / 1000;
+						var deltatime = (now - last_resetted);	             // czas od zresetowania
+						var ontime = (parseInt(s4201)+parseInt(s4202)*60); // to jest czas uruchomienia
+						
+
+						deltatime = Math.round(deltatime / (3600*24));		// czas od zresetowania w dniach
+						ontime = ontime / 60;					// czas uruchomienia w godzinach
+						
+						document.getElementById('Wk').value = substr(('' + ontime/deltatime),0,5);
+					}
+				}
+			}
+			var url="/device/sensors/control/ajax/?method=read";
+			xmlhttp.open("GET",url,true);
+			xmlhttp.send(null);			
+			  
+		} 
+	</script>
+</%def>
+<%def name="body()" >
+	<img src="/media/str_images/${registry['web-struct-image']}.png" alt="Uklad">
+    <script type="text/javascript">setInterval("control_update()",5000); </script>
+    <table>
+    <% mik = True %>
+    % for sensor in sensors:
+        % if (request.session['AccountDevice.privileges']==0) and (not sensor.canUserRead):
+            
+        % else:
+        	% if mik:
+	            <tr>
+	            <td>${sensor.name}</td>
+                    % if sensor.register == 4077:
+                    <td><select id="s${sensor.lsRepr()}" onfocus="this.hasFocus=true;" onblur="this.hasFocus=false;">
+           			<%
+           			   if sensor.getLastRead()[0] == 'ERROR':
+           			   	value=255
+           			   elif sensor.getLastRead()[0] == 'NOTREADED':
+           			   	value=254
+           			   else:
+           			    value=sensor.getLastRead()[0]
+           			   combo = {0:u'LATO',1:u'ZIMA',2:u'AUTO',254:'NOTREADED',255:'ERROR'}
+           			 %>
+
+           			% for k, v in combo.iteritems():
+           				% if value == k:
+           					<option value="${k}" selected="selected">${v}</option>
+           				% else:
+           					<option value="${k}">${v}</option>
+           				% endif
+           			% endfor
+           		</select></td>
+                    % else:
+                        <td><input type="text" size="8" id="s${sensor.lsRepr()}" value="${sensor.getLastRead()[0]}" onfocus="this.hasFocus=true;" onblur="this.hasFocus=false;"></td>
+                    % endif
+
+
+                    <td style="padding-left: 1em;"><span id="ss${sensor.lsRepr()}">${str(sensor.getLastRead()[1])[11:]}</span></td>
+	            % if (request.session['AccountDevice.privileges']==0) and (not sensor.canUserWrite):
+	                <td></td>
+	            % else:
+	            	% if (sensor.canAdminWrite):
+	                	<td style="padding-left: 1em;"><input class="button" type="button" onclick="submit(${sensor.id},'${sensor.lsRepr()}');" value="Ustaw"></td>
+	                % else:
+	                	<td></td>
+	                % endif
+	            % endif
+	            <% mik = False %>
+			% else:
+	            <td>${sensor.name}</td>
+
+                    % if sensor.register == 4077:
+                    <td><select id="s${sensor.lsRepr()}" onfocus="this.hasFocus=true;" onblur="this.hasFocus=false;">
+           			<%
+           			   if sensor.getLastRead()[0] == 'ERROR':
+           			   	value=255
+           			   elif sensor.getLastRead()[0] == 'NOTREADED':
+           			   	value=254
+           			   else:
+           			    value=sensor.getLastRead()[0]
+           			   combo = {0:u'LATO',1:u'ZIMA',2:u'AUTO',254:'NOTREADED',255:'ERROR'}
+           			 %>
+
+           			% for k, v in combo.iteritems():
+           				% if value == k:
+           					<option value="${k}" selected="selected">${v}</option>
+           				% else:
+           					<option value="${k}">${v}</option>
+           				% endif
+           			% endfor
+           		</select></td>
+                    % else:
+                        <td><input type="text" size="8" id="s${sensor.lsRepr()}" value="${sensor.getLastRead()[0]}" onfocus="this.hasFocus=true;" onblur="this.hasFocus=false;"></td>
+                    % endif
+
+	            <td style="padding-left: 1em;"><span id="ss${sensor.lsRepr()}">${str(sensor.getLastRead()[1])[11:]}</span></td>
+	            % if (request.session['AccountDevice.privileges']==0) and (not sensor.canUserWrite):
+	                <td></td>
+	            % else:
+	            	% if (sensor.canAdminWrite):
+	                	<td style="padding-left: 1em;"><input class="button" type="button" onclick="submit(${sensor.id},'${sensor.lsRepr()}');" value="Ustaw"></td>
+	                % else:
+	                	<td></td>
+	                % endif
+	            % endif
+	            </tr>
+	            <% mik = True %>
+	        % endif       
+        % endif
+    % endfor
+    
+    % if not mik:
+    	<td colspan="4"></td></tr>
+    % endif
+    		<tr><td colspan="8"></td></tr>
+    		<tr>
+    		<td>&alpha;</td>
+    		<td><input type="text" size="8" id="alfa" value="${alfa}"></td>
+    		<td style="padding-left: 1em;" colspan="2">Włączeń na godzinę</td>
+    		<td>Wk</td>
+    		<td><input type="text" size="8" id="Wk" value="${str(Wk)[:5]}"></td>
+    		<td style="padding-left: 1em;" colspan="2">Czas pracy [h] na dobę</td>
+    		</tr>
+    </table>
+    Ostatnio resetowane: ${last_reset.strftime("%Y-%m-%d %H:%M")}
+</%def>

@@ -1,0 +1,18 @@
+# -*- coding: utf-8 -*-
+<%inherit file="/base/introspection.html" />
+<%def name="head()" >
+</%def>
+<%def name="body()" >
+	<h1>CO1 - skrzydło B</h1>
+	Średni błąd względny: ${errR1*100}%<br>
+	Średni błąd bezwzdlędny: ${errA1}&deg;C<br>
+	Referencyjna: ${ref1}&deg;C<br>
+	<h1>CO2 - pałac</h1>
+	Średni błąd względny: ${errR2*100}%<br>
+	Średni błąd bezwzdlędny: ${errA2}&deg;C<br>
+	Referencyjna: ${ref2}&deg;C<br>
+	<h1>CO3 - skrzydło A</h1>
+	Średni błąd względny: ${errR3*100}%<br>
+	Średni błąd bezwzdlędny: ${errA3}&deg;C<br>
+	Referencyjna: ${ref3}&deg;C<br>
+</%def>

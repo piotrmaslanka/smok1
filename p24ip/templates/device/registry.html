@@ -1,0 +1,11 @@
+# -*- coding: utf-8 -*-
+<%inherit file="/base/introspection.html" />
+<%def name="head()" >
+</%def>
+<%def name="body()" >
+	<table>
+		% for key, val in registry.iteritems():
+			<tr><td><b>${key}</b></td><td>${val}</td></tr>
+		% endfor
+	</table>
+</%def>

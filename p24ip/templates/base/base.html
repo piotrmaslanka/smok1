@@ -1,0 +1,70 @@
+# coding=UTF-8
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=utf-8" />
+  <meta http-equiv="Content-Language" content="pl-PL" />
+  <meta name="Description" content="SMOK to system służący do zdalnego monitorowania pracy kotłowni przez Internet bez zbędnych utrudnień" />
+  <link rel="stylesheet" type="text/css" href="/media/style.css" media="all" />
+  <title>SMOK - System Monitorowania Odległych Kotłowni</title>
+	${self.head()}
+</head>
+<body>
+  <div id="MAIN-CONTAINER">
+    <div id="CONTAINER">
+      <div id="TOP"></div>
+      <div id="LEFT-COLUMN">
+        <p style="margin-bottom:15px">
+          <img src="/media/logo.png" alt="" />
+        </p>
+        
+        <!-- PRZYCISKI -->
+        <div onclick="document.location.href='/manage/pick/'" id="button-wybierz"> </div>
+        <div style="height:7px; width:10px"></div>
+       	% if request.session['device_picked']:
+	      <div onclick="document.location.href='/device/overview/'" id="button-przeglad"> </div>
+        <% from p24ip.manage import get_struct %>
+    		  % for entry in get_struct(request).menu():
+    		  	% if entry[2]:
+    		  		<!-- <img src="${entry[0]}" alt="${entry[3]}" style="padding-bottom: 2px;" onclick="window.location='${entry[1]}';"><br> -->
+    		  		 <div style="height:7px; width:10px"></div>
+    		  		 <div onclick="document.location.href='${entry[1]}'" id="button-${entry[3]}"> </div>
+    		  	% else:
+    		  		<input type="button" class="mbutton" value="${entry[0]}" onclick="window.location='${entry[1]}';"><br>
+    		  	% endif
+    		  % endfor
+    		  % if request.session['AccountDevice.privileges']==1:
+    		  	  <!--<img src="/media/guzik_INTROSPEKCJA.png" alt="Introspekcja" style="padding-bottom: 2px;" onclick="window.location='/device/sensors/control/';"><br>-->
+    		  	  <div style="height:7px; width:10px"></div>
+    		  		<div onclick="document.location.href='/device/sensors/control/'" id="button-introspekcja"> </div>
+    		  % endif
+    		% endif  
+    	  <div style="height:7px; width:10px"></div>
+        <div onclick="document.location.href='/login/logout/'" id="button-wyloguj"> </div>
+    	 <!-- KONIEC -->
+    	
+        <p style="margin-bottom:15px">
+          <img src="/media/dietrich.png" alt="" />
+        </p>
+         <p style="margin-bottom:15px">
+          <img src="/media/frisko.png" alt="" />
+        </p>
+       </div>
+      
+      <div id="RIGHT-COLUMN">
+      
+      <!-- TRESC GLOWNA STRONY -->  
+        <h1 style="display: inline">SMOK</h1>
+        	% if request.session['device_picked']:
+        		- ${request.session['AccountDevice.short_name']}
+        	% endif
+        	 <p>&nbsp;</p>
+	         	${self.body()}
+	     <!-- KONIEC -->
+	     
+      </div>
+      <div class="clear"></div>
+    </div>
+  </div>
+</body>	
+</html>

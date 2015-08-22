@@ -1,0 +1,19 @@
+# -*- coding: utf-8 -*-
+<%inherit file="/base/base.html" />
+<%def name="head()" >
+</%def>
+<%def name="body()" >
+    <table>
+    	<tr><th>Nazwa sensora</th><th colspan="2" style="padding-left: 2em;">Minimum</th><th colspan="2" style="padding-left: 2em;">Maksimum</th></tr>
+    	<tr><th></th><th>Wartość</th><th>Data</th><th style="padding-left: 2em;">Wartość</th><th style="padding-left: 2em;">Data</th></tr>
+    	% for name, val in reads.iteritems():
+    		<tr>
+    			<td>${name}</td>
+    			<td style="padding-left: 2em;">${val[0].ArchSensor.Sensor.fromStorage(val[0].data)}</td>
+    			<td style="padding-left: 2em;">${val[0].readed_on}</td>
+    			<td style="padding-left: 2em;">${val[1].ArchSensor.Sensor.fromStorage(val[1].data)}</td>
+    			<td style="padding-left: 2em;">${val[1].readed_on}</td>
+    		</tr>
+    	% endfor
+    </table>
+</%def>

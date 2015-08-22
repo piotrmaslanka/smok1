@@ -1,0 +1,1 @@
+P24DATABASE_ROOT = '/var/p24/'

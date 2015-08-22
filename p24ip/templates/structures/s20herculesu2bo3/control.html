@@ -1,0 +1,55 @@
+# -*- coding: utf-8 -*-
+<%inherit file="/base/base.html" />
+<%def name="head()" >
+    <script type="text/javascript" src="/media/ajax.js"></script>
+    <script type="text/javascript" src="/media/control.js"></script>
+</%def>
+<%def name="body()" >
+	<img src="/media/str_images/${registry['web-struct-image']}.png" alt="Uklad">
+    <script type="text/javascript"> setInterval("control_update()",5000); </script>
+    <table>
+    % for sensor in sensors:
+        % if (request.session['AccountDevice.privileges']==0) and (not sensor.canUserRead):
+        	
+        % else:
+            <tr>
+            <td>${sensor.name}</td>
+            <td>
+              % if (sensor.register in (7097, 7098, 7099, 7100, 7108, 7109, 7105, 7106)):
+                            <select id="s${sensor.lsRepr()}" onfocus="this.hasFocus=true;" onblur="this.hasFocus=false;">
+                                    <%
+                                       if sensor.getLastRead()[0] == 'ERROR':
+                                            value=255
+                                       elif sensor.getLastRead()[0] == 'NOTREADED':
+                                            value=254
+                                       else:
+                                        value=sensor.getLastRead()[0]
+                                       combo = {0:u'WYŁ',1:u'ZAŁ',254:'NOTREADED',255:'ERROR'}
+                                     %>
+
+                                    % for k, v in combo.iteritems():
+                                            % if value == k:
+                                                    <option value="${k}" selected="selected">${v}</option>
+                                            % else:
+                                                    <option value="${k}">${v}</option>
+                                            % endif
+                                    % endfor
+                            </select>
+                 % else:
+                    <input type="text" size="8"  id="s${sensor.lsRepr()}" value="${sensor.getLastRead()[0]}" onfocus="this.hasFocus=true;" onblur="this.hasFocus=false;">
+                 % endif
+            </td>
+            <td style="padding-left: 2em;"><span id="ss${sensor.lsRepr()}">${str(sensor.getLastRead()[1])[11:]}</span></td>
+            % if (request.session['AccountDevice.privileges']==0) and (not sensor.canUserWrite) and (sensor.canAdminWrite):
+                <td></td>
+            % else:
+	            	% if (sensor.canAdminWrite):
+	                	<td style="padding-left: 1em;"><input class="button" type="button" onclick="submit(${sensor.id},'${sensor.lsRepr()}');" value="Ustaw"></td>
+	                % else:
+	                	<td></td>
+	                % endif
+            % endif
+        % endif
+    % endfor
+    </table>
+</%def>

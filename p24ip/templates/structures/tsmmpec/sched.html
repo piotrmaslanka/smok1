@@ -1,0 +1,200 @@
+# -*- coding: utf-8 -*-
+<%inherit file="/base/introspection.html" />
+<%def name="head()" >
+    <script type="text/javascript" src="/media/ajax.js"></script>
+    <script type="text/javascript">
+    	var standby = false;
+    	
+		function startChanges()
+		{
+			setTimeout("doChanges()", 2000);
+			document.getElementById('standby_box').innerHTML = '...';
+		}
+		
+		function doChanges()
+		{
+			var xmlhttp = getXmlHttp();
+			xmlhttp.onreadystatechange=function()
+			{
+			if (xmlhttp.readyState==4) 
+				{
+					if (xmlhttp.responseText == 'OK')
+					{
+						document.getElementById('standby_box').innerHTML = 'CZEKAJ';
+						document.getElementById('circuit').disabled = true;
+						document.getElementById('day').disabled = true;
+						standby = true;
+					} else
+					{
+						document.getElementById('standby_box').innerHTML = 'BŁĄD';
+					}
+				}
+			}
+			var url="/device/own/sched_ajax/?method=sel&circ="+document.getElementById('circuit').value+"&day="+document.getElementById('day').value;
+			xmlhttp.open("GET",url,true);
+			xmlhttp.send(null);			   				
+		}
+		
+		function rupdate()
+		{
+			if (!standby) return;
+			var xmlhttp = getXmlHttp();
+			xmlhttp.onreadystatechange=function()
+			{
+			if (xmlhttp.readyState==4)
+			{
+				if (xmlhttp.responseText.substring(0,1)=='[')
+				{
+					data = eval(xmlhttp.responseText);
+					document.getElementById('per1start_h').value = data[0];
+					document.getElementById('per1end_h').value = data[1];
+					document.getElementById('per2start_h').value = data[2];
+					document.getElementById('per2end_h').value = data[3];	
+					document.getElementById('per1start_m').value = data[4];
+					document.getElementById('per1end_m').value = data[5];
+					document.getElementById('per2start_m').value = data[6];
+					document.getElementById('per2end_m').value = data[7];
+					
+					
+					if (parseInt(document.getElementById('circuit').value)==data[8])
+						if (parseInt(document.getElementById('day').value)==data[9])
+							if (standby)
+							{
+								document.getElementById('circuit').disabled = false;
+								document.getElementById('day').disabled = false;
+								standby = false;
+								document.getElementById('standby_box').innerHTML = '';
+							}
+				}
+			}
+			}
+			xmlhttp.open("GET","/device/own/sched_ajax/?method=get",true);
+			xmlhttp.send(null);
+		}
+		
+		function doSet(what)
+		{
+			var xmlhttp = getXmlHttp();
+			xmlhttp.onreadystatechange=function()
+			{
+			if (xmlhttp.readyState==4) 
+					alert(xmlhttp.responseText);
+			}
+			var url="/device/own/sched_ajax/?method=set&";
+			if (what==1) url = url + "what=1&v1="+document.getElementById('per1start_h').value+"&v2="+document.getElementById('per1start_m').value+"&v3="+document.getElementById('per1end_h').value+"&v4="+document.getElementById('per1end_m').value;
+			if (what==2) url = url + "what=2&v1="+document.getElementById('per2start_h').value+"&v2="+document.getElementById('per2start_m').value+"&v3="+document.getElementById('per2end_h').value+"&v4="+document.getElementById('per2end_m').value;
+			xmlhttp.open("GET",url,true);
+			xmlhttp.send(null);			    	    	    				
+		}
+    </script>
+</%def>
+<%def name="body()" >
+	<script type="text/javascript">setInterval("rupdate()",5000);</script>
+    <table>
+    <tr><td colspan="3" id="standby_box" style="color: red;"></td></tr>
+    <tr>
+    	<td>Obwód</td>
+    	<td colspan="2">
+    	<select name="circuit" id="circuit" onchange="startChanges()">
+    		% if int(ocirc_sel) == 0:
+    			<option value="0" selected="selected">CO</option>
+    			<option value="1">CCW</option>
+    			<option value="2">CWU</option>
+    		% elif int(ocirc_sel) == 1:
+    			<option value="0">CO</option>
+    			<option value="1" selected="selected">CCW</option>
+    			<option value="2">CWU</option>
+    		% elif int(ocirc_sel) == 2:
+    			<option value="0">CO</option>
+    			<option value="1">CCW</option>
+    			<option value="2" selected="selected">CWU</option>
+    		% endif
+    	</select>
+    	</td>
+    </tr>
+    
+    <tr>
+    	<td>Dzień</td>
+    	<td colspan="2">
+    	   	<select name="day" id="day" onchange="startChanges()">
+    	   	% if int(dayblock) == 0:
+    	   		<option value="0" selected="selected">Poniedziałek</option>
+    	   		<option value="1">Wtorek</option>
+    	   		<option value="2">Środa</option>
+    	   		<option value="3">Czwartek</option>
+    	   		<option value="4">Piątek</option>
+    	   		<option value="5">Sobota</option>
+    	   		<option value="6">Niedziela</option>
+    	   	% elif int(dayblock) == 1:
+    	   		<option value="0">Poniedziałek</option>
+    	   		<option value="1" selected="selected">Wtorek</option>
+    	   		<option value="2">Środa</option>
+    	   		<option value="3">Czwartek</option>
+    	   		<option value="4">Piątek</option>
+    	   		<option value="5">Sobota</option>
+    	   		<option value="6">Niedziela</option>
+    	   	% elif int(dayblock) == 2:
+    	   		<option value="0">Poniedziałek</option>
+    	   		<option value="1">Wtorek</option>
+    	   		<option value="2" selected="selected">Środa</option>
+    	   		<option value="3">Czwartek</option>
+    	   		<option value="4">Piątek</option>
+    	   		<option value="5">Sobota</option>
+    	   		<option value="6">Niedziela</option>
+    	   	% elif int(dayblock) == 3:
+    	   		<option value="0">Poniedziałek</option>
+    	   		<option value="1">Wtorek</option>
+    	   		<option value="2">Środa</option>
+    	   		<option value="3" selected="selected">Czwartek</option>
+    	   		<option value="4">Piątek</option>
+    	   		<option value="5">Sobota</option>
+    	   		<option value="6">Niedziela</option>
+    	   	% elif int(dayblock) == 4:
+    	   		<option value="0">Poniedziałek</option>
+    	   		<option value="1">Wtorek</option>
+    	   		<option value="2">Środa</option>
+    	   		<option value="3">Czwartek</option>
+    	   		<option value="4" selected="selected">Piątek</option>
+    	   		<option value="5">Sobota</option>
+    	   		<option value="6">Niedziela</option>
+    	   	% elif int(dayblock) == 5:
+    	   		<option value="0">Poniedziałek</option>
+    	   		<option value="1">Wtorek</option>
+    	   		<option value="2">Środa</option>
+    	   		<option value="3">Czwartek</option>
+    	   		<option value="4">Piątek</option>
+    	   		<option value="5" selected="selected">Sobota</option>
+    	   		<option value="6">Niedziela</option>
+    	   	% elif int(dayblock) == 6:
+    	   		<option value="0">Poniedziałek</option>
+    	   		<option value="1">Wtorek</option>
+    	   		<option value="2">Środa</option>
+    	   		<option value="3">Czwartek</option>
+    	   		<option value="4">Piątek</option>
+    	   		<option value="5">Sobota</option>
+    	   		<option value="6" selected="selected">Niedziela</option>
+			% endif    	   		
+    		</select>
+    	</td>
+    </tr>
+    
+    
+    <tr>
+    	<td>Okres 1</td>
+    	<td><input type="text" id="per1start_h" value="${int(per1start_h)}">:
+    		<input type="text" id="per1start_m" value="${int(per1start_m)}"> do 
+    		<input type="text" id="per1end_h" value="${int(per1end_h)}">:
+    		<input type="text" id="per1end_m" value="${int(per1end_m)}"></td>
+    	<td><input class="button" type="button" value="Ustaw" onclick="doSet(1)"</td>
+    </tr>
+    <tr>
+    	<td>Okres 2</td>
+    	<td><input type="text" id="per2start_h" value="${int(per2start_h)}">:
+    		<input type="text" id="per2start_m" value="${int(per2start_m)}"> do 
+    		<input type="text" id="per2end_h" value="${int(per2end_h)}">:
+    		<input type="text" id="per2end_m" value="${int(per2end_m)}"></td>
+    	<td><input class="button" type="button" value="Ustaw" onclick="doSet(2)"</td>
+    </tr>
+    
+    </table>
+</%def>

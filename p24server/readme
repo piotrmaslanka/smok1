@@ -1,0 +1,5 @@
+Throw this source to /usr/local/bin/p24server please
+Throw p24server.init.d to /etc/init.d and rename it to p24server
+then issue chkconfig --add p24server to register it with chkconfig
+
+thanks!

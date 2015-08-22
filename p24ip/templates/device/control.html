@@ -1,0 +1,30 @@
+# -*- coding: utf-8 -*-
+<%inherit file="/base/introspection.html" />
+<%def name="head()" >
+    <script type="text/javascript" src="/media/ajax.js"></script>
+    <script type="text/javascript" src="/media/control.js"></script>
+</%def>
+<%def name="body()" >
+    <script type="text/javascript"> setInterval("control_update()",5000); </script>
+    <table>
+    % for sensor in sensors:
+        % if (request.session['AccountDevice.privileges']==0) and (not sensor.canUserRead):
+        	
+        % else:
+            <tr>
+            <td>${sensor.name}</td>
+            <td><input type="text" size="8" id="s${sensor.lsRepr()}" value="${sensor.getLastRead()[0]}" onfocus="this.hasFocus=true;" onblur="this.hasFocus=false;"></td>
+            <td style="padding-left: 2em;"><span id="ss${sensor.lsRepr()}">${str(sensor.getLastRead()[1])[11:]}</span></td>
+            % if (request.session['AccountDevice.privileges']==0) and (not sensor.canUserWrite) and (sensor.canAdminWrite):
+                <td></td>
+            % else:
+	            	% if (sensor.canAdminWrite):
+	                	<td style="padding-left: 1em;"><input class="button" type="button" onclick="submit(${sensor.id},'${sensor.lsRepr()}');" value="Ustaw"></td>
+	                % else:
+	                	<td></td>
+	                % endif
+            % endif
+        % endif
+    % endfor
+    </table>
+</%def>

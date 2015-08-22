@@ -1,0 +1,26 @@
+dim p24_command as byte 'przechowuje polecenie pakietu
+dim p24_data as string 'przechowuje dane pakietu
+
+sub p24_read_packet_blocking() 'czytaj pakiet, blokuj doevents dopóki nie przyjdzie
+	dim size as byte
+	while sock.rxlen < 2 doevents wend
+	size = asc(sock.getdata(1))
+	p24_command = asc(sock.getdata(1))
+	if size > 1 then
+		while sock.rxlen < (size-1) doevents wend
+		p24_data = sock.getdata(size-1)
+	end if
+	
+end sub
+
+sub p24_write_packet() 'wyœlij pakiet po drucie
+	sock.setdata(chr(len(p24_data)+1))
+	sock.setdata(chr(p24_command))
+	sock.setdata(p24_data)
+	sock.send()
+end sub
+
+
+function p24_make_string(byref cos as string) as string 'zrób pstringa ze stringa
+	p24_make_string = chr(len(cos)) + cos
+end function

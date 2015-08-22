@@ -1,0 +1,27 @@
+'
+'	Rozpiska EPROM-u
+'	1-4			Mój IP				'ip'
+'	5-8			Maska podsieci		'subnet'
+'	8-12		Brama domyœlna		'router'
+'	13-16		Serwer DNS			'pdns'
+' 	17-??		Domena serwera 		'server'		as pstring
+'				Nie ruszaæ broñ Bo¿e, reszta kodu zale¿y od tego
+
+function eprom_get_ip() as string ' Pobierz IP z EPROMu
+	eprom_get_ip = ddstr(stor.getdata(1,4))
+end function
+function eprom_get_subnet() as string ' Pobierz maskê podsieci z EPROMu
+	stor.base = 9
+	eprom_get_subnet = ddstr(stor.getdata(5,4))
+end function
+function eprom_get_router() as string ' Pobierz bramê domyœln¹ z EPROMu
+	eprom_get_router = ddstr(stor.getdata(9,4))
+end function
+function eprom_get_pdns() as string ' Pobierz podstawowy DNS z EPROMu
+	eprom_get_pdns = ddstr(stor.getdata(13,4))		
+end function
+function eprom_get_target() as string ' Pobierz nazwê domenow¹ serwera z EPROMu
+	eprom_get_target = stor.getdata(18,asc(stor.getdata(17,1)))
+end function
+
+

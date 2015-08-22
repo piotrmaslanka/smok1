@@ -1,0 +1,247 @@
+include "global.tbh"
+dim cready as boolean = false
+
+dim dhcp_lease_time as dword 'this is a counter-down for remaining lease time
+dim dhcp_result as ok_ng 'keep this as global- your program might want to use this data
+dim dhcp_defined as boolean = false
+
+sub set_ip(dhcp_ip as string(16), dhcp_gateway as string(16), dhcp_netmask as string(16))
+	dim f as byte
+	'Now it is time to set these parameters. Remember, that this will only be successful if ALL sockets
+	'are in a CLOSED state. The dhcp_obtain() already closed ITS socket, but maybe you used some other
+	'sockets before this point? Here is a "safe code" that just makes sure everything is closed
+	'We cannot change the IP-address while at least one socket is NOT in the CLOSED state
+	sock.inconenabledmaster=NO 
+	for f=0 to sock.numofsock-1
+		sock.num=f
+		if sock.statesimple<>PL_SSTS_CLOSED then
+			sock.discard
+			while sock.statesimple<>PL_SSTS_CLOSED
+			wend
+		end if
+	next f
+
+	'Now set the NET parameters
+	net.ip=dhcp_ip
+	net.gatewayip=dhcp_gateway
+	net.netmask=dhcp_netmask
+
+	sock.inconenabledmaster=YES 'allow incoming connetions again
+end sub
+
+
+sub on_sys_init()
+	modbus_init()			' Zainicjuj MODBUS, policz tablice CRC
+							
+
+
+	
+
+	dim f as byte
+	dim dhcp_ip, dhcp_gateway, dhcp_netmask as string(16)
+	dim dhcp_result as ok_ng
+	
+	'It is a good practice to indicate that we are now in DHCP
+	pat.play("~GB-",PL_PAT_CANINT) '<<<<<<<<<< CHANGE IF YOU WISH
+		
+	'Start by obtaining data from DHCP server.
+	'dhcp_lease_time=0 'we clear this first
+	'dhcp_result=dhcp_obtain(dhcp_ip,dhcp_gateway,dhcp_netmask,dhcp_lease_time,"DMS SMOK") '<<< PUT ACTUAL DEVICE NAME!
+
+	'if	dhcp_result = OK then
+		'DHCP session was successful
+	'	set_ip(dhcp_ip, dhcp_gateway, dhcp_netmask)
+	'else
+		'could not complete DHCP- you decide what to do here <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+		'For example, can set fixed IP OR DO SOMETHING ELSE <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	'	sys.reboot()
+	'end if
+
+	'dhcp_defined = true
+									' DZISIAJ SA DANE Z DHCP!!!!!
+	net.ip = "192.168.2.7"
+	net.netmask = "255.255.255.0"
+	net.gatewayip = "192.168.2.1"
+							
+'	dns_init_dns()			' Inicjuj DNS
+	
+'	watchdog_interval = 80	' Inicjuj watchdoga
+'	watchdog_feed()
+'	watchdog_enabled = true
+
+'	while sock.statesimple <> PL_SSTS_EST doevents wend		' Czekaj na wczyt gniazda
+	
+'	dim target_ip as string
+	'target_ip = eprom_get_target()
+	
+'	pat.play(SIGINT_DNS_RESOLVE, PL_PAT_CANINT)
+'	dns_query("s1.in.smok.dms-serwis.com.pl")
+'	watchdog_feed()
+'end sub
+
+
+
+'sub on_sock_data_arrival()
+	dim p24server_ip as string(15)
+
+	sock.num = 0
+	'p24server_ip = dns_getip() ' Ustaw cel po³¹czenia
+	p24server_ip = "91.192.167.227"
+	
+	'sock.close()
+	'watchdog_feed()
+	'while sock.statesimple <> PL_SSTS_CLOSED doevents wend ' Czekaj a¿ gniazdo siê zwolni
+	watchdog_interval = 120	'Minuta timeoutu na watchdoga
+	
+	sock.targetip = p24server_ip	
+		
+'	if dns_status = NG then
+'		sys.reboot()
+'	end if
+	
+	sock.connectiontout = 120
+	sock.gendataarrivalevent = NO
+	sock.targetport = 2405
+	sock.protocol = PL_SOCK_PROTOCOL_TCP
+	sock.reconmode = PL_SOCK_RECONMODE_3
+	sock.txclear()
+	sock.rxclear()
+	pat.play(SIGINT_SRV_CONNECT, PL_PAT_CANINT) 	
+	cready = true 'Jeœli od teraz gniazdo siê zamknie to reset
+	sock.connect()
+	watchdog_feed()
+	
+	while sock.statesimple <> PL_SSTS_EST doevents wend 'Czekaj na zestawienie po³¹czenia
+
+	'sock.setdata(ddval(net.mac)+ddval("0.0")) 'Wyœlij MAC i dorównaj dwoma bajtami
+
+	sock.setdata(ddval("0.0.0.0.0.3.0.1")) 
+
+'
+	
+	'
+	'
+	'				ACHTUNG!!!!!!!!!!
+	'
+	'
+	
+	
+	
+'	 sock.setdata(ddval("0.0.0.0.0")+ddval("253")+ddval("0.0")) 		' TAM GDZIE JEST NAPISANE 255 WPISZ NR URZADZENIA!!!!!
+	' sock.setdata(ddval("0.0.0.0.0")+ddval("255")+ddval("0.0")) 		' TAM GDZIE JEST NAPISANE 255 WPISZ NR URZADZENIA!!!!!
+																	' POTEM ZAPISZ I WGRAJ
+	
+	'
+	'
+	'				KONIEC ACHTUNGA
+	'
+	'
+
+
+	sock.setdata(ddval("0.0.0.0")) 'Wersja protoko³u = 0x00000000
+	sock.send()
+	
+	watchdog_feed()
+	p24_read_packet_blocking()
+	if p24_command > 0 then		'Jeœli serwer nie odeœle zera, to reset
+		sys.reboot()
+	end if
+	 
+	while true
+		pat.play(SIGINT_CONNECTED, PL_PAT_CANINT)	
+		watchdog_feed()					'Szamnij jakiœ pakiet
+		p24_read_packet_blocking()
+		pat.play(SIGINT_PROCESSING, PL_PAT_CANINT)	
+		select case p24_command
+			case 0:						' KEEPALIVE
+				p24_command = 0
+				p24_data = ""
+			case 1:						' COMPLEX SETTINGS PRZEPIER
+				stor.setdata(p24_data, 1) 'Wpisz nowe nastawy w EPROM
+				p24_command = 0
+				p24_data = ""
+			case 2:						' GIVE ME SETTINGS
+				p24_command = 0			' Odessij z EPROMu nastawy i poœlij
+				p24_data = stor.getdata(1,16) + p24_make_string(eprom_get_target())
+			case 3:		' GET HOLDING RET ERROR - czytaj holding
+				dim wartosc as word
+				wartosc = modbus_read_holding_single(asc(right(p24_data,1)), asc(p24_data)*256 + asc(mid(p24_data,2,1)))
+				if modbus_state = MODBUS_OK then
+					p24_command = 0
+					p24_data = chr(wartosc / 256) + chr(wartosc and 255)
+				else
+					p24_command = 254
+					if modbus_state = MODBUS_TIMEOUT then
+						p24_data = ddval("1")
+					else
+						p24_data = ddval("0")
+					end if
+				end if
+			case 4:		' GET COIL RET ERROR - czytaj coil
+				dim c_wartosc as byte
+				c_wartosc = modbus_read_coil_single(asc(right(p24_data,1)), asc(p24_data)*256 + asc(mid(p24_data,2,1)))
+				if modbus_state = MODBUS_OK then
+					p24_command = 0
+					p24_data = chr(c_wartosc)
+				else
+					p24_command = 254
+					if modbus_state = MODBUS_TIMEOUT then
+						p24_data = ddval("1")
+					else
+						p24_data = ddval("0")
+					end if
+				end if
+			case 5:				' WRITE HOLDING 
+				modbus_write_holding_single(asc(right(p24_data,1)), asc(p24_data)*256 + asc(mid(p24_data,2,1)), asc(mid(p24_data,3,1))*256 + asc(mid(p24_data,4,1)))
+				if modbus_state = MODBUS_OK then
+					p24_command = 0
+					p24_data = chr(c_wartosc)
+				else
+					p24_command = 254
+					if modbus_state = MODBUS_TIMEOUT then
+						p24_data = ddval("1")
+					else
+						p24_data = ddval("0")
+					end if
+				end if
+			case 6:			' WRITE COIL
+				modbus_write_coil_single(asc(right(p24_data,1)), asc(p24_data)*256 + asc(mid(p24_data,2,1)), asc(mid(p24_data,3,1)))
+				if modbus_state = MODBUS_OK then
+					p24_command = 0
+					p24_data = chr(c_wartosc)
+				else
+					p24_command = 254
+					if modbus_state = MODBUS_TIMEOUT then
+						p24_data = ddval("1")
+					else
+						p24_data = ddval("0")
+					end if
+				end if
+			case 7:			' GET NETWORK CLIENT VENDOR
+				p24_command = 0
+				p24_data = chr(len(VENDOR_ID)) + VENDOR_ID
+			case else:		' NOT IMPLEMENTED
+				p24_command = 255
+				p24_data = ""
+		end select
+		p24_write_packet()	' I wyœlij w œwiat
+	wend
+end sub
+
+sub on_sock_event(newstate as pl_sock_state, newstatesimple as pl_sock_state_simple)
+	if cready = true then	'Jeœli ³¹czmy siê z serwerem...
+		if newstatesimple = PL_SSTS_CLOSED then '... i zresetuj¹ nam po³¹czenie
+		sys.reboot() end if	'To reboot
+	end if
+end sub
+
+
+sub on_sys_timer()
+	watchdog_do() 'Czeknij watchdoga
+'	if dhcp_defined = true then
+'		if dhcp_lease_time = 0 then 
+'			sys.reboot()
+'		end if
+'		dhcp_lease_time = dhcp_lease_time - 1
+'	end if
+end sub

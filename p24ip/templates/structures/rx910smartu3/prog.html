@@ -1,0 +1,102 @@
+# -*- coding: utf-8 -*-
+<%inherit file="/base/introspection.html" />
+<%def name="head()" >
+    <script type="text/javascript" src="/media/ajax.js"></script>
+    <script type="text/javascript">
+    function swrite(sid)
+    {
+    	value = document.getElementById('s'+sid).value;
+		
+		var xmlhttp = getXmlHttp();
+		xmlhttp.onreadystatechange=function()
+		{if (xmlhttp.readyState==4) 
+			{
+				if (xmlhttp.responseText == 'OK')
+						alert('Ustawiono');
+				else alert(xmlhttp.responseText);
+			}
+		}
+		var url="/device/own/prog_ajax/?method=write&sid="+sid+"&value="+value;
+		xmlhttp.open("GET",url,true);
+		xmlhttp.send(null);	    	
+    }
+    function pri_refresh()
+    {
+		var xmlhttp = getXmlHttp();    
+		xmlhttp.onreadystatechange=function()
+		{if (xmlhttp.readyState==4) 
+			if (xmlhttp.responseText.substring(0,1) == '[')
+			{
+				sensor_data = eval(xmlhttp.responseText);
+				for (sensor_key in sensor_data)
+				{
+					sensor = sensor_data[sensor_key];
+					sens_id = sensor[0];
+					if (document.getElementById('s'+sens_id).hasFocus != true)
+					{
+						document.getElementById('s'+sens_id).value = sensor[1];
+						document.getElementById('ss'+sens_id).innerHTML = sensor[2].substring(11);
+					}
+				}
+				alert('Odświeżono');
+			}		}
+		var url="/device/own/prog_ajax/?method=read&refresh=0";    
+		xmlhttp.open("GET",url,true);
+		xmlhttp.send(null);	    	
+    }
+    function refresh()
+    {
+		var xmlhttp = getXmlHttp();
+		xmlhttp.onreadystatechange=function()
+		{ 
+			if (xmlhttp.readyState==4) { 
+			alert('Odczekaj ok. 10 sekund'); 
+			setTimeout('pri_refresh()', 10000);}
+		}	
+		var url="/device/own/prog_ajax/?method=read&refresh=1";
+		xmlhttp.open("GET",url,true);
+		xmlhttp.send(null);	    	
+    }
+    </script>
+</%def>
+<%def name="body()" >
+    <table>
+    	<tr><th colspan="4">CO1</th></tr>
+		% for senid, sensor in sensors[:9]:
+			<tr>
+				<td>${sensor.name}</td>
+	            <td><input type="text" size="8" id="s${senid}" value="${sensor.getLastRead()[0]}" onfocus="this.hasFocus=true;" onblur="this.hasFocus=false;"></td>
+	            <td style="padding-left: 2em;"><span id="ss${senid}">${str(sensor.getLastRead()[1])[11:]}</span></td>
+				<td style="padding-left: 1em;"><input type="button" onclick="swrite(${senid})" value="Ustaw"></td>
+			</tr>
+		% endfor
+    	<tr><th colspan="4">CO2</th></tr>
+		% for senid, sensor in sensors[9:18]:
+			<tr>
+				<td>${sensor.name}</td>
+	            <td><input type="text" size="8" id="s${senid}" value="${sensor.getLastRead()[0]}" onfocus="this.hasFocus=true;" onblur="this.hasFocus=false;"></td>
+	            <td style="padding-left: 2em;"><span id="ss${senid}">${str(sensor.getLastRead()[1])[11:]}</span></td>
+				<td style="padding-left: 1em;"><input type="button" onclick="swrite(${senid})" value="Ustaw"></td>
+			</tr>
+		% endfor
+		<tr><th colspan="4">CWU</th></tr>
+		% for senid, sensor in sensors[18:25]:
+			<tr>
+				<td>${sensor.name}</td>
+	            <td><input type="text" size="8" id="s${senid}" value="${sensor.getLastRead()[0]}" onfocus="this.hasFocus=true;" onblur="this.hasFocus=false;"></td>
+	            <td style="padding-left: 2em;"><span id="ss${senid}">${str(sensor.getLastRead()[1])[11:]}</span></td>
+				<td style="padding-left: 1em;"><input type="button" onclick="swrite(${senid})" value="Ustaw"></td>
+			</tr>
+		% endfor
+		<tr><th colspan="4">Parametry</th></tr>
+		% for senid, sensor in sensors[25:]:
+			<tr>
+				<td>${sensor.name}</td>
+	            <td><input type="text" size="8" id="s${senid}" value="${sensor.getLastRead()[0]}" onfocus="this.hasFocus=true;" onblur="this.hasFocus=false;"></td>
+	            <td style="padding-left: 2em;"><span id="ss${senid}">${str(sensor.getLastRead()[1])[11:]}</span></td>
+				<td style="padding-left: 1em;"><input type="button" onclick="swrite(${senid})" value="Ustaw"></td>
+			</tr>
+		% endfor		
+    </table>
+    <input type="button" onclick="refresh();" value="Odśwież">
+</%def>

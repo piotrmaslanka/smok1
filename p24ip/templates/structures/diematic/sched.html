@@ -1,0 +1,206 @@
+# -*- coding: utf-8 -*-
+<%inherit file="/base/introspection.html" />
+<%def name="head()" >
+    <style type="text/css">
+    </style>
+    <script type="text/javascript" src="/media/ajax.js"></script>
+    <script type="text/javascript">
+    	var standby = false;
+
+                function mathmal(li)
+                {
+                    x = new Array();
+                    x[0] = li & 32768;
+                    x[1] = li & 16384;
+                    x[2] = li & 8192;
+                    x[3] = li & 4096;
+                    x[4] = li & 2048;
+                    x[5] = li & 1024;
+                    x[6] = li & 512;
+                    x[7] = li & 256;
+                    x[8] = li & 128;
+                    x[9] = li & 64;
+                    x[10] = li & 32;
+                    x[11] = li & 16;
+                    x[12] = li & 8;
+                    x[13] = li & 4;
+                    x[14] = li & 2;
+                    x[15] = li & 1;
+                    return x;
+                }
+
+                function dtc(fv)
+                {
+                    var arry = new Array();
+                    for (var i = 0; i<48; i++)
+                        if (document.getElementById(fv+'-'+i).checked) {arry[i] = 1;} else {arry[i] = 0;}
+
+                    var bo = 0;
+                    var c1 = 32768*arry[0+bo] + 16384*arry[1+bo]+8192*arry[2+bo]+4096*arry[3+bo]+2048*arry[4+bo]+1024*arry[5+bo]+512*arry[6+bo]+256*arry[7+bo];
+                    c1 += 128*arry[8+bo]+64*arry[9+bo]+32*arry[10+bo]+16*arry[11+bo]+8*arry[12+bo]+4*arry[13+bo]+2*arry[14+bo]+1*arry[15+bo];
+                    bo = 16;
+                    var c2 = 32768*arry[0+bo] + 16384*arry[1+bo]+8192*arry[2+bo]+4096*arry[3+bo]+2048*arry[4+bo]+1024*arry[5+bo]+512*arry[6+bo]+256*arry[7+bo];
+                    c2 += 128*arry[8+bo]+64*arry[9+bo]+32*arry[10+bo]+16*arry[11+bo]+8*arry[12+bo]+4*arry[13+bo]+2*arry[14+bo]+1*arry[15+bo];
+                    bo = 32;
+                    var c3 = 32768*arry[0+bo] + 16384*arry[1+bo]+8192*arry[2+bo]+4096*arry[3+bo]+2048*arry[4+bo]+1024*arry[5+bo]+512*arry[6+bo]+256*arry[7+bo];
+                    c3 += 128*arry[8+bo]+64*arry[9+bo]+32*arry[10+bo]+16*arry[11+bo]+8*arry[12+bo]+4*arry[13+bo]+2*arry[14+bo]+1*arry[15+bo];
+
+                    return new Array(c1, c2, c3);
+                }
+
+		function rupdate()
+		{
+			var xmlhttp = getXmlHttp();
+			xmlhttp.onreadystatechange=function()
+			{
+			if (xmlhttp.readyState==4)
+			if (xmlhttp.responseText.substring(0,1)=='{')
+			{
+                            var data = eval('('+xmlhttp.responseText+')');
+
+                            for (var did in data)
+                            {
+                                    var a = mathmal(data[did][0]);
+                                    a = a.concat(mathmal(data[did][1]));
+                                    a = a.concat(mathmal(data[did][2]));
+                                    for (var i=0; i<48; i++)
+                                    {
+                                        document.getElementById(did+"-"+i).checked = (a[i] > 0);
+                                    }
+                            }
+                        }}
+			xmlhttp.open("GET","/device/own/sched_ajax/?method=get",true);
+			xmlhttp.send(null);
+		}
+
+                function refresh()
+                {
+			var xmlhttp = getXmlHttp();
+			xmlhttp.onreadystatechange=function()
+			{
+			if (xmlhttp.readyState==4)
+			if (xmlhttp.responseText=='OK')
+			{
+                                setTimeout("rupdate()", 60000);
+                                alert('Poczekaj 60 sekund');
+                        }}
+			xmlhttp.open("GET","/device/own/sched_ajax/?method=refresh",true);
+			xmlhttp.send(null);
+                }
+
+		
+		function doSet(fv)
+		{
+			var xmlhttp = getXmlHttp();
+			xmlhttp.onreadystatechange=function()
+			{
+			if (xmlhttp.readyState==4) 
+					alert(xmlhttp.responseText);
+			}
+                        values = dtc(fv);
+			var url="/device/own/sched_ajax/?method=set&fv="+fv+"&v1="+values[0]+"&v2="+values[1]+"&v3="+values[2];
+			xmlhttp.open("GET",url,true);
+			xmlhttp.send(null);			    	    	    				
+		}
+    </script>
+</%def>
+<%def name="body()" >
+    <% dow = {0: u'PON', 1: u'WT', 2:u'ŚR', 3:u'CZW', 4:u'PT', 5:u'SOB', 6:u'NIE'} %>
+    <h2>CO.A</h2>
+    <table>
+        <tr>
+            % for x in xrange(0, 24):
+                <th>${x}</th>
+                <th></th>
+            % endfor
+        </tr>
+    % for y in xrange(0, 7):
+        <tr>
+        % for x in xrange(0, 24):
+        <td><input class="c" type="checkbox" id="a${y}-${(2*x)}" value="1"></td>
+        <td><input class="c" type="checkbox" id="a${y}-${(2*x+1)}" value="1"></td>
+        % endfor
+        <td><input type="button" onclick="doSet('a${y}')" value="Ustaw"></td>
+        <td>${dow[y]}</td>
+        </tr>
+    % endfor
+    </table>
+    <h2>CO.B</h2>
+    <table>
+        <tr>
+            % for x in xrange(0, 24):
+                <th>${x}</th>
+                <th></th>
+            % endfor
+        </tr>
+    % for y in xrange(0, 7):
+        <tr>
+        % for x in xrange(0, 24):
+        <td><input class="c" type="checkbox" id="b${y}-${(2*x)}" value="1"></td>
+        <td><input class="c" type="checkbox" id="b${y}-${(2*x+1)}" value="1"></td>
+        % endfor
+        <td><input type="button" onclick="doSet('b${y}')" value="Ustaw"></td>
+        <td>${dow[y]}</td>
+        </tr>
+    % endfor
+</table>
+    <h2>CO.C</h2>
+    <table>
+        <tr>
+            % for x in xrange(0, 24):
+                <th>${x}</th>
+                <th></th>
+            % endfor
+        </tr>
+    % for y in xrange(0, 7):
+        <tr>
+        % for x in xrange(0, 24):
+        <td><input class="c" type="checkbox" id="c${y}-${(2*x)}" value="1"></td>
+        <td><input class="c" type="checkbox" id="c${y}-${(2*x+1)}" value="1"></td>
+        % endfor
+        <td><input type="button" onclick="doSet('c${y}')" value="Ustaw"></td>
+        <td>${dow[y]}</td>
+        </tr>
+    % endfor
+    </table>
+    <h2>CO.ECS</h2>
+    <table>
+        <tr>
+            % for x in xrange(0, 24):
+                <th>${x}</th>
+                <th></th>
+            % endfor
+        </tr>
+    % for y in xrange(0, 7):
+        <tr>
+        % for x in xrange(0, 24):
+        <td><input class="c" type="checkbox" id="e${y}-${(2*x)}" value="1"></td>
+        <td><input class="c" type="checkbox" id="e${y}-${(2*x+1)}" value="1"></td>
+        % endfor
+        <td><input type="button" onclick="doSet('e${y}')" value="Ustaw"></td>
+        <td>${dow[y]}</td>
+        </tr>
+    % endfor
+    </table>
+    <h2>CO.AUX</h2>
+    <table>
+        <tr>
+            % for x in xrange(0, 24):
+                <th>${x}</th>
+                <th></th>
+            % endfor
+        </tr>
+    % for y in xrange(0, 7):
+    <tr>
+        % for x in xrange(0, 24):
+        <td><input class="c" type="checkbox" id="x${y}-${(2*x)}" value="1"></td>
+        <td><input class="c" type="checkbox" id="x${y}-${(2*x+1)}" value="1"></td>
+        % endfor
+        <td><input type="button" onclick="doSet('x${y}')" value="Ustaw"></td>
+        <td>${dow[y]}</td>
+        </tr>
+    % endfor
+    </table>
+    <input type="button" onclick="refresh()" value="Odśwież">
+    <script type="text/javascript">rupdate();</script>
+</%def>

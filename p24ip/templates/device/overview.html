@@ -1,0 +1,35 @@
+# -*- coding: utf-8 -*-
+<%inherit file="/base/base.html" />
+<%def name="head()" >
+</%def>
+<%def name="body()" >
+    <h1>${dev.short_name}</h1>
+    % if dev.isOnline():
+        <span style="color: green;">ONLINE</span>
+    % else:
+        <span style="color: red;">OFFLINE</span>
+    % endif
+    <br>
+    
+    <br>
+    <strong>Oprogramowanie: </strong>${vendor}<br>
+    <strong>Układ: </strong>${struct.description}<br>
+    <strong>Lokalizacja: </strong> ${dev.localisation}<br>
+    ${dev.description.replace("\n","<br>")}
+    % if request.session['Account.privileges'] == 1:
+        <br>
+        <strong>ID: </strong> ${dev.dev_number}<br>
+        <strona>Wątek rządu: </strong> ${af.getStat('thread.handler')}<br>
+        <strona>Wątek odczytu: </strong> ${af.getStat('thread.reader')}<br>
+        <strona>Połączono: </strong> ${af.getStat('connected.on')}<br>
+        <strona>Rozłączono: </strong> ${af.getStat('disconnected.on')}<br>
+        <strona>Kolejka oczekiwań: </strong> ${af.getStat('queue.pending')}<br>
+        <strona>Kolejka wysłań: </strong> ${af.getStat('queue.sent')}<br>
+        <strona>Sukcesów: </strong> ${af.getStat('transmission.successes')}<br>
+        <strona>Błędów: </strong> ${af.getStat('transmission.errors')}<br>
+        <strona>Koryguj błędy?</strong> ${af.getRegistry('correct.errors')}<br>
+        <strona>Ostatnie oglądanie sensorów: </strong> ${af.getStat('runlevel1.lastreported')}<br>
+        <a href="/device/restat/clearstats/">Czyść statystyki transmisji</a><br>
+        <a href="/device/restat/errtoggle/">Przełącz korekcję błędów</a><br>
+    % endif
+</%def>

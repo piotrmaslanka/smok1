@@ -1,0 +1,10 @@
+# -*- coding: utf-8 -*-
+<%inherit file="/base/introspection.html" />
+<%def name="head()" >
+</%def>
+<%def name="body()" >
+	<form action="/arch/export/datepick/" method="post">
+		${form.as_p()}
+		<input type="submit" value="Wyświetl" />
+	</form>    
+</%def>

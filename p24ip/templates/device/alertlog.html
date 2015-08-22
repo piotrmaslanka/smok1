@@ -1,0 +1,28 @@
+# -*- coding: utf-8 -*-
+<%inherit file="/base/introspection.html" />
+<%def name="head()" >
+</%def>
+<%def name="body()" >
+	<table>
+		<% alerty = filter(lambda x: x.severity <= severity, alerts) %>
+		% for alert in alerty:
+			<tr>
+				<td>
+					% if alert.severity == 0: 
+						<img src="/media/icon_alarm.png" alt="Alarm">
+					% elif alert.severity == 1:
+						<img src="/media/icon_alert.png" alt="Alert">
+					% elif alert.severity == 2:
+						<img src="/media/icon_notice.png" alt="Uwaga">
+					% endif
+				</td>
+				<td>
+					${alert.date}
+				</td>
+				<td>
+					${alert.info}
+				</td>
+			</tr>
+		% endfor
+	</table>
+</%def>

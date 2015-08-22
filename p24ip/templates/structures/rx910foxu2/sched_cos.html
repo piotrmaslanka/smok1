@@ -1,0 +1,124 @@
+# -*- coding: utf-8 -*-
+<%inherit file="/base/introspection.html" />
+<%def name="head()" >
+    <script type="text/javascript" src="/media/ajax.js"></script>
+    <script type="text/javascript">
+    	var standby = false;
+    	
+		function startChanges()
+		{
+			setTimeout("doChanges()", 2000);
+			document.getElementById('standby_box').innerHTML = '...';
+		}
+		
+		function doChanges()
+		{
+			var xmlhttp = getXmlHttp();
+			xmlhttp.onreadystatechange=function()
+			{
+			if (xmlhttp.readyState==4) 
+				{
+					if (xmlhttp.responseText == 'OK')
+					{
+						document.getElementById('standby_box').innerHTML = 'CZEKAJ';
+						document.getElementById('day').disabled = true;
+						standby = true;
+					} else
+					{
+						document.getElementById('standby_box').innerHTML = 'BŁĄD';
+					}
+				}
+			}
+			var url="/device/own/sched_cos_ajax/?method=sel&day="+document.getElementById('day').value;
+			xmlhttp.open("GET",url,true);
+			xmlhttp.send(null);			   				
+		}
+		
+		function rupdate()
+		{
+			if (!standby) return;
+			var xmlhttp = getXmlHttp();
+			xmlhttp.onreadystatechange=function()
+			{
+			if (xmlhttp.readyState==4)
+			{
+				if (xmlhttp.responseText.substring(0,1)=='[')
+				{
+					data = eval(xmlhttp.responseText);
+					document.getElementById('per1start_h').value = data[0];
+					document.getElementById('per1end_h').value = data[1];
+					document.getElementById('per2start_h').value = data[2];
+					document.getElementById('per2end_h').value = data[3];	
+                                        if (parseInt(document.getElementById('day').value)==data[4])
+                                                if (standby)
+                                                {
+                                                        document.getElementById('day').disabled = false;
+                                                        standby = false;
+                                                        document.getElementById('standby_box').innerHTML = '';
+                                                }
+				}
+			}
+			}
+			xmlhttp.open("GET","/device/own/sched_cos_ajax/?method=get",true);
+			xmlhttp.send(null);
+		}
+		
+		function doSet(what)
+		{
+			var xmlhttp = getXmlHttp();
+			xmlhttp.onreadystatechange=function()
+			{
+			if (xmlhttp.readyState==4) 
+					alert(xmlhttp.responseText);
+			}
+			var url="/device/own/sched_cos_ajax/?method=set&";
+			if (what==1) url = url + "what=1&v1="+document.getElementById('per1start_h').value+"&v2="+document.getElementById('per1end_h').value;
+			if (what==2) url = url + "what=2&v1="+document.getElementById('per2start_h').value+"&v2="+document.getElementById('per2end_h').value;
+			xmlhttp.open("GET",url,true);
+			xmlhttp.send(null);			    	    	    				
+		}
+    </script>
+</%def>
+<%def name="body()" >
+	<script type="text/javascript">setInterval("rupdate()",5000);</script>
+    <table>
+    <tr><td colspan="3">Nastawy CO Slave</td></tr>
+    <tr><td colspan="3" id="standby_box" style="color: red;"></td></tr>
+   
+    <tr>
+    	<td>Dzień</td>
+    	<td colspan="2">
+    	   	<select name="day" id="day" onchange="startChanges()">
+    	   	% if int(dayblock) == 0:
+    	   		<option value="0" selected="selected">Pn-Pt</option>
+    	   		<option value="1">So</option>
+    	   		<option value="2">Nie</option>
+    	   	% elif int(dayblock) == 1:
+    	   		<option value="0">Pn-Pt</option>
+    	   		<option value="1" selected="selected">So</option>
+    	   		<option value="2">Nie</option>
+    	   	% elif int(dayblock) == 2:
+    	   		<option value="0">Pn-Pt</option>
+    	   		<option value="1">So</option>
+    	   		<option value="2" selected="selected">Nie</option>
+                % endif
+    		</select>
+    	</td>
+    </tr>
+    
+    
+    <tr>
+    	<td>Okres 1</td>
+    	<td><input type="text" id="per1start_h" value="${int(per1start_h)}"> do 
+    		<input type="text" id="per1end_h" value="${int(per1end_h)}">
+    	<td><input class="button" type="button" value="Ustaw" onclick="doSet(1)"</td>
+    </tr>
+    <tr>
+    	<td>Okres 2</td>
+    	<td><input type="text" id="per2start_h" value="${int(per2start_h)}"> do
+    		<input type="text" id="per2end_h" value="${int(per2end_h)}">:
+    	<td><input class="button" type="button" value="Ustaw" onclick="doSet(2)"</td>
+    </tr>
+    
+    </table>
+</%def>

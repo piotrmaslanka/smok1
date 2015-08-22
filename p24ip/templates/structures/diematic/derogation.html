@@ -1,0 +1,114 @@
+# -*- coding: utf-8 -*-
+<%inherit file="/base/introspection.html" />
+<%def name="head()" >
+    <script type="text/javascript" src="/media/ajax.js"></script>
+    <script type="text/javascript">
+    function get()
+    {
+		var xmlhttp = getXmlHttp();
+		xmlhttp.onreadystatechange=function()
+		{if (xmlhttp.readyState==4)
+			{
+                            if (xmlhttp.responseText.substring(0,1) == '[')
+                            {
+                              var a = eval(xmlhttp.responseText);
+                              document.getElementById("ao").value = a[0] & 46;
+                              document.getElementById("aw").value = a[0] & 80;
+                              document.getElementById("bo").value = a[1] & 46;
+                              document.getElementById("bw").value = a[1] & 80;
+                              document.getElementById("co").value = a[2] & 46;
+                              document.getElementById("cw").value = a[2] & 80;
+                            }}}
+		var url="/device/own/derogation_ajax/?method=get";
+		xmlhttp.open("GET",url,true);
+		xmlhttp.send(null);
+    }
+    function set(fv)
+    {
+		var xmlhttp = getXmlHttp();
+
+                var derog = Number(document.getElementById(fv+"o").value)+Number(document.getElementById(fv+"w").value);
+
+		xmlhttp.onreadystatechange=function()
+		{if (xmlhttp.readyState==4)
+                        alert(xmlhttp.responseText);
+                }
+		var url="/device/own/derogation_ajax/?method=set&fv="+fv+"&derog="+derog;
+		xmlhttp.open("GET",url,true);
+		xmlhttp.send(null);
+    }
+    function refresh()
+    {
+		var xmlhttp = getXmlHttp();
+		xmlhttp.onreadystatechange=function()
+		{
+			if (xmlhttp.readyState==4) {
+			alert('Odczekaj ok. 30 sekund');
+			setTimeout('get()', 30000);}
+		}
+		var url="/device/own/derogation_ajax/?method=refresh";
+		xmlhttp.open("GET",url,true);
+		xmlhttp.send(null);
+    }
+    </script>
+</%def>
+<%def name="body()" >
+    <table>
+        <tr><th colspan="3">CO.A</th></tr>
+        <tr>
+            <td>
+                <select id="ao">
+                    <option value="8">AUTO</option>
+                    <option value="4">Stale dzień</option>
+                    <option value="2">Stale noc</option>
+                    <option value="36">Wymuś dzień</option>
+                    <option value="34">Wymuś noc</option>
+                </select>
+            </td>
+            <td><input type="button" value="Ustaw" onclick="set('a')"></td>
+        </tr>
+        <tr><th colspan="3">CO.B</th></tr>
+        <tr>
+            <td>
+                <select id="bo">
+                    <option value="8">AUTO</option>
+                    <option value="4">Stale dzień</option>
+                    <option value="2">Stale noc</option>
+                    <option value="36">Wymuś dzień</option>
+                    <option value="34">Wymuś noc</option>
+                </select>
+            </td>
+            <td><input type="button" value="Ustaw" onclick="set('b')"></td>
+        </tr>
+        <tr><th colspan="3">CO.C</th></tr>
+        <tr>
+            <td>
+                <select id="co">
+                    <option value="8">AUTO</option>
+                    <option value="4">Stale dzień</option>
+                    <option value="2">Stale noc</option>
+                    <option value="36">Wymuś dzień</option>
+                    <option value="34">Wymuś noc</option>
+                </select>
+            </td>
+            <td><input type="button" value="Ustaw" onclick="set('c')"></td>
+        </tr>
+
+        <tr><th colspan="3">CWU</th></tr>
+        <tr>
+            <td>
+                <select id="aw">
+                    <option value="0">AUTO</option>
+                    <option value="16">Stale ładuj</option>
+                    <option value="80">Raz ładuj</option>
+                </select>
+            </td>
+            <td><input type="button" value="Ustaw" onclick="set('a')"></td>
+        </tr>
+        <tr>
+            <td colspan="3"><input type="button" value="Odśwież" onclick="refresh()"></td>
+        </tr>
+    </table>
+    <script type="text/javascript">get();</script>
+
+</%def>

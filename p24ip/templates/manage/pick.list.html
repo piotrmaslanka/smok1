@@ -1,0 +1,28 @@
+# -*- coding: utf-8 -*-
+<%inherit file="/base/base.html" />
+<%def name="head()" >
+</%def>
+<%def name="body()" >
+    % for ad in ads:
+    	<strong>${ad.Device.short_name}</strong>
+    	   	
+    	% if ad.Device.isAlert():
+    		<div style="display: inline; padding-left: 2em; font-size: 3em; font-weight: bold; color: blue;">ALARM</div> 
+    	% endif
+
+    	<div style="float: right;">
+    	% if ad.Device.isOnline():
+    		<div style="font-size: 3em; color: green;">ONLINE</div>
+    	% else:
+    		<div style="font-size: 3em; color: red;">OFFLINE</div>
+    	% endif
+    	</div>
+    	    	
+    	<br>${ad.Device.description.replace("\n","<br />")}<br>
+       <div onclick="document.location.href='/manage/pick/${ad.id}'" id="button-wybierz"> </div>
+      
+      <!-- <img src="/media/guzik_WYBIERZ.png" alt="Wybierz" onclick="window.location='/manage/pick/${ad.id}';"> 
+       	-->
+         <hr>
+    % endfor
+</%def>

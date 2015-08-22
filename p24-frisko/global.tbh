@@ -1,0 +1,64 @@
+'	P24 Tibbo Client
+'	(c) Piotr Maœlanka
+'	sppiotr@dms-serwis.com.pl
+'	all rights reserved
+
+' (FRISKO-1.0) "0.11-STABLE-DEVELOPMENT"
+
+const SIGINT_DNS_RESOLVE = "~R-" ' Rozwi¹zujê zapytanie DNS
+const SIGINT_SRV_CONNECT = "~G-" ' Trwa ³¹czenie z serwerem P24
+const SIGINT_CONNECTED = "~B" ' Po³¹czony, czekam na rozkazy
+const SIGINT_PROCESSING = "~B-"	' Po³¹czony, przetwarzam rozkaz
+const VENDOR_ID = "FRISKO-1.0"
+
+	'DNS stuffa
+declare dns_status as OK_NG
+declare sub dns_init_dns()
+declare function dns_query(to_resolve as string) as string
+declare function dns_getip() as string
+
+
+'EPROM stuffa
+declare function eprom_get_ip() as string
+declare function eprom_get_subnet() as string
+declare function eprom_get_router() as string
+declare function eprom_get_pdns() as string
+declare function eprom_get_target() as string
+	'P24 stuffa
+declare p24_data as string(255)
+declare p24_command as byte		
+
+declare sub p24_write_packet()					
+declare sub p24_read_packet_blocking()			
+declare function p24_make_string(byref cos as string) as string
+
+	'MODBUS stuffa
+enum modbus_status 
+	MODBUS_OK = 0
+	MODBUS_TIMEOUT = 1
+	MODBUS_CHECKSUM = 2
+end enum	
+	
+declare modbus_state as modbus_status
+declare sub modbus_init()	
+' device to nr urz¹dzenia w rozumieniu protoko³u MODBUS
+declare function modbus_read_holding_single(device as byte, id as word) as word		
+declare function modbus_read_coil_single(device as byte, id as word) as byte	
+declare sub modbus_write_holding_single(device as byte, id as word, data as word)	
+declare sub modbus_write_coil_single(device as byte, id as word, data as byte)
+declare sub modbus_serial_reset()
+
+	' Watchdog
+declare sub watchdog_do
+declare sub watchdog_feed	
+declare watchdog_started as word
+declare watchdog_interval as word
+declare watchdog_enabled as boolean = false
+
+	' DHCP
+	
+declare function dhcp_obtain(byref obtained_ip as string, byref obtained_gateway as string,
+byref obtained_netmask as string, byref obtained_lease_time as dword, device_name as string(32)) as ok_ng
+
+const SOCK_DHCP = 0	
+

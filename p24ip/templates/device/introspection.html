@@ -1,0 +1,35 @@
+# -*- coding: utf-8 -*-
+<%inherit file="/base/introspection.html" />
+<%def name="head()" >
+</%def>
+<%def name="body()" >
+	<table>
+		<tr>
+			<td>Serwer sterownika</td><td>p24server</td><td>
+			% if p24server:
+				<span style="color: green;">AKTYWNY</span>
+			% else:
+				<span style="color: red;">NIEAKTYWNY</span>
+			% endif
+			</td>
+		</tr>
+		<tr>
+			<td>Serwer archiwizacji</td><td>p24arch</td><td>
+			% if p24arch:
+				<span style="color: green;">AKTYWNY</span>
+			% else:
+				<span style="color: red;">NIEAKTYWNY</span>
+			% endif
+			</td>
+		</tr>
+		<tr>
+			<td>Serwer aplikacji</td><td>p24pazur</td><td>
+			% if p24pazur:
+				<span style="color: green;">AKTYWNY</span>
+			% else:
+				<span style="color: red;">NIEAKTYWNY</span>
+			% endif
+			</td>
+		</tr>
+	</table>
+</%def>

@@ -1,0 +1,87 @@
+# coding=UTF-8
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=utf-8" />
+  <meta http-equiv="Content-Language" content="pl-PL" />
+  <meta name="Description" content="SMOK to system służący do zdalnego monitorowania pracy kotłowni przez Internet bez zbędnych utrudnień" />
+  <link rel="stylesheet" type="text/css" href="/media/style.css" media="all" />
+  <title>SMOK - System Monitorowania Odległych Kotłowni</title>
+</head>
+<body>
+  <div id="MAIN-CONTAINER">
+    <div id="CONTAINER">
+      <div id="TOP"></div>
+      <div id="LEFT-COLUMN">
+        <p style="margin-bottom:15px">
+          <img src="/media/logo.png" alt="" />
+        </p>
+        <div onclick="document.location.href='#'" id="button-info"> </div>
+        <div style="height:7px; width:10px"></div>
+        <div onclick="document.location.href='#'" id="button-demo"> </div>
+       
+        <div class="box">
+          <div class="box-top">
+            <p style="padding-top:10px;">Logowanie</p>
+           </div>
+           <div class="box-middle">
+              <form action="/login/login/" method="post">
+                <input type="text" class="input-login" name="login" /><br />
+                <input type="password" class="input-login" name="password" style="margin-top:5px;"/><br />
+                <input type="image" alt="zaloguj" value="" class="png" src="/media/zaloguj.jpg" style="margin-top:5px; margin-left:120px"/>
+              </form>
+           </div>
+           <div class="box-bottom"></div>
+        </div>
+        
+          <div class="box">
+          <div class="box-top">
+            <p style="padding-top:10px;">Aktualności</p>
+           </div>
+           <div class="box-middle" style="text-align:left;">
+             
+              <p style="font-weight:bold">2010.11.09</p>
+              <p>Dodano możliwość skorzystania z konta testowego!<br />
+                Użytkownik: <strong>test</strong><br />
+                Hasło: <strong>test</strong>
+              </p>
+              
+              <p style="font-weight:bold;margin-top:20px">2010.06.07</p>
+               <p>Poprawiono stabilność systemu oraz wydajność w przypadku 
+                 regulacji Diematic</p>
+                 
+           </div>
+           <div class="box-bottom"></div>
+        </div>
+         <p style="margin-bottom:15px">
+          <img src="/media/dietrich.png" alt="" />
+        </p>
+         <p style="margin-bottom:15px">
+          <img src="/media/frisko.png" alt="" />
+        </p>
+        
+       </div>
+      
+      <div id="RIGHT-COLUMN">
+        <h1>SMOK</h1>
+        <p>Wychodząc naprzeciw oczekiwaniom wielu Naszych Klientów firma stworzyła platformę internetową SMOK – System Monitoringu Odległych Kotłowni. Platforma zapewnia integrację usług monitoringu kotłowni olejowych, gazowych, oczyszczalni ścieków, układów solarnych a także innych systemów automatycznego sterowania gdzie sterownikiem, bądź regulatorem jest produkowany przez wrocławską firmę FRISKO model RX 910, MR 65, SR 368, S20(każda aplikacja), MR 210, MR 208 lub inny podobny. Nie ma tu znaczenia jaka struktura programowa jest zaimplementowana w urządzeniu. Systemem SMOK objęty jest również program produkcji kotłów marki De Dietrich typu C 230, MC 35, MC 65, MC 90, MC 115 i innych z regulacją Diematic 3 lub Diematic M3. Do poprawnego i sprawnego działania systemu jest posiadanie łącza internetowego oraz specjalnego, zaprogramowanego modułu konwertera RS232/Ethernet i... nic więcej. Architektura platformy SMOK składa się z bardzo wielu rozproszonych obiektów, łączących się poprzez sieć Internet z centralnym serwerem, który zbiera, analizuje i przetwarza dane. Co ważne nie są tu potrzebne żadne czyności związane z przekierowaniem portów, specjalne ustawienia na routerach czy też inne zabiegi. Połączenie odbywa się bezproblemowo i bez udziału administratora sieci. Dla Użytkownika przedstawiane są na b ieżąco dane z opóźnieniem kilku sekund. Platforma umożliwa również archiwizację wszystkich lub wybranych danych z zadanym interwałem. Dane przetwarzane są do formatu Microsoft Excel® gdzie po pobraniu z zakładki Archiwum (wg wybranego przedziału czasowego) można je dalej obrabiać. System wykrywa również sytuacje awaryjne i alarmuje o nich użytkownika. Dzięki rozbudowanej analityce uzyskujemy również dane dotyczące parametrów mówiących o jakości regulacji. Wszystko to by móc w sposób interaktywny wpływać na poprawę ekonomiki zarządzanych obiektów. Uzyskiwane wykresy przebiegów czasowych monitorowanego systemu są niezbędne dla prawidłowej analizy poprawności pracy.</p>
+  <p>Dla poprawnego zarządzania posiadanymi urządzeniami Platforma umożliwia także zmianę wszystkich lub jedynie wybranych parametrów regulatora np. kotłowni (programy czasowe, parametry, nastawy serwisowe i inne). Dla szybkiej identyfikacji posiadanych zasobów prezentowany jest schemat ideowy instalacji, gdzie zaznaczone punkty pomiaru czy urządzenia wykonawcze korespondują z odpowiednimi opisami w arkuszu. Platforma umożliwia także personalizację dostępu z zakresie autoryzowanego pełnego dostępu administracyjnego oraz ograniczonego dostępu użytkownika. Parametry dostępowe mogą być dowolnie konfigurowane. Każdy z Państwa chcąc monitorować swój układ (kotłownię, układ wentylacyjny, solarny, inny) posiadając w obiekcie Internet, może łatwo i bezproblemowo zarządzać go z dowolnego miejsca, nawet za pomocą telefonu komórkowego wyposażonego w przeglądarkę. Dotychczasowe dane uzyskane od użytkowników pokazują, że system SMOK pozwolił na wygenerowanie oszczędności minimum 10% w stosunku do sezonu grzewczego 2008/2009 !!!</p>
+
+        <p style="text-align:center;"><img src="/media/publica_screenshot.png" style="width: 700px;" alt="Ekran systemu" /></p>
+         <p style="text-align:center;"><img src="/media/publica_wykres.png" style="width: 700px;" alt="Wykres" /></p>
+
+  <p>Co więc należałoby zrobić? Po przesłaniu nam kilku danych technicznych Państwa obiektu wysyłamy Państwu zaprogramowany moduł konwertera oraz dane dostępowe (hasło i login). Państwo podłączacie go do regulatora Frisko i już od tego momentu możecie zarządzać swoim obiektem przez Internet. Miejsce instalacji w Polsce nie ma tu żadnego znaczenia.</p>
+  <p>Wszelkie pytania proszę kierować na adres biuro@dms-serwis.com.pl</p>
+
+  <p>Koszty dostępu do systemu SMOK uzgadniane są indywidualnie</p>
+
+  <p>Zapraszamy więc do współpracy - <a href="mailto:biuro@dms-serwis.com.pl">DMS Serwis</a></p>
+
+      </div>
+      <div class="clear"></div>
+    </div>
+    
+  </div>
+
+</body>
+</html>

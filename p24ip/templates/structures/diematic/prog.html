@@ -1,0 +1,90 @@
+# -*- coding: utf-8 -*-
+<%inherit file="/base/introspection.html" />
+<%def name="head()" >
+    <script type="text/javascript" src="/media/ajax.js"></script>
+    <script type="text/javascript">
+    function swrite(sid)
+    {
+    	value = document.getElementById('s'+sid).value;
+		
+		var xmlhttp = getXmlHttp();
+		xmlhttp.onreadystatechange=function()
+		{if (xmlhttp.readyState==4) 
+			{
+				if (xmlhttp.responseText == 'OK')
+						alert('Ustawiono');
+				else alert(xmlhttp.responseText);
+			}
+		}
+		var url="/device/own/prog_ajax/?method=write&sid="+sid+"&value="+value;
+		xmlhttp.open("GET",url,true);
+		xmlhttp.send(null);	    	
+    }
+    function pri_refresh()
+    {
+		var xmlhttp = getXmlHttp();    
+		xmlhttp.onreadystatechange=function()
+		{if (xmlhttp.readyState==4) 
+			if (xmlhttp.responseText.substring(0,1) == '[')
+			{
+				sensor_data = eval(xmlhttp.responseText);
+				for (sensor_key in sensor_data)
+				{
+					sensor = sensor_data[sensor_key];
+					sens_id = sensor[0];
+					if (document.getElementById('s'+sens_id).hasFocus != true)
+					{
+                                                if (sensor[3] == 'T') sensor[1] = sensor[1] / 10;
+						document.getElementById('s'+sens_id).value = sensor[1];
+						document.getElementById('ss'+sens_id).innerHTML = sensor[2].substring(11);
+					}
+				}
+				alert('Odświeżono');
+			}		}
+		var url="/device/own/prog_ajax/?method=read&refresh=0";    
+		xmlhttp.open("GET",url,true);
+		xmlhttp.send(null);	    	
+    }
+    function refresh()
+    {
+		var xmlhttp = getXmlHttp();
+		xmlhttp.onreadystatechange=function()
+		{ 
+			if (xmlhttp.readyState==4) { 
+			alert('Odczekaj ok. 30 sekund');
+			setTimeout('pri_refresh()', 30000);}
+		}	
+		var url="/device/own/prog_ajax/?method=read&refresh=1";
+		xmlhttp.open("GET",url,true);
+		xmlhttp.send(null);	    	
+    }
+    </script>
+</%def>
+<%def name="body()" >
+    <table>
+        <% xt = (('Obw. A',(0, 5)), ('Obw. B',(5,12)), ('Obw. C',(12,19)), ('CWU',(19,20)), ('Parametry',(20,30))) %>
+
+        % for name, stypes in xt:
+    	<tr><th colspan="4">${name}</th></tr>
+            % for senid, sensor, sentype in sensors[stypes[0]:stypes[1]]:
+			<tr>
+				<td>${sensor.name}</td>
+                        <%
+                        y = sensor.getLastRead()[0]
+                        try:
+                            y = int(sensor.getLastRead()[0])
+                        except:
+                            pass
+                        else:
+                            if sentype == 'T':
+                                y = float(y) / 10
+                         %>
+	            <td><input type="text" size="8" id="s${senid}" value="${y}" onfocus="this.hasFocus=true;" onblur="this.hasFocus=false;"></td>
+	            <td style="padding-left: 2em;"><span id="ss${senid}">${str(sensor.getLastRead()[1])[11:]}</span></td>
+				<td style="padding-left: 1em;"><input type="button" onclick="swrite(${senid})" value="Ustaw"></td>
+			</tr>
+            % endfor
+        % endfor
+    </table>
+    <input type="button" onclick="refresh();" value="Odśwież">
+</%def>

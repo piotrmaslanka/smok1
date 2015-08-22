@@ -1,0 +1,97 @@
+# -*- coding: utf-8 -*-
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<title>Wygaszacz</title>
+	<style type="text/css">
+	#mainpage
+	{
+		overflow: hidden;
+		margin: 0 0 0 0;
+		padding: 0 0 0 0;
+		height: 100%;
+		width: 100%;
+	}
+	.external
+	{
+		position: absolute;
+		bottom: 50%;
+		right: 50%;
+		height: 50%;
+		width: 50%;
+	}
+	.internal
+	{
+		position: absolute;
+		bottom: 50%;
+		left: 50%;		
+		height: 50%;
+		width: 50%;
+	}
+	.cwu
+	{
+		position: absolute;
+		top: 50%;
+		right: 50%;
+		height: 50%;
+		width: 50%;
+	}
+	.co
+	{
+		position: absolute;
+		top: 50%;
+		left: 50%;		
+		height: 50%;
+		width: 50%;
+	}
+	.centrum
+	{
+		text-align: center;
+		color: white;
+		font-size: 10em;
+		font-weight: bold;
+		vertical-align: middle;
+	}	
+	</style>
+    <script type="text/javascript" src="/media/ajax.js"></script>	
+	<script type="text/javascript">
+	function update()
+	{
+			var xmlhttp = getXmlHttp();
+			xmlhttp.onreadystatechange=function()
+			{
+				if (xmlhttp.readyState==4) 
+				{
+					if (xmlhttp.responseText.substring(0,1) == '[')
+					{
+						data = eval(xmlhttp.responseText);
+						document.getElementById("binternal").innerHTML = data[0];
+						document.getElementById("bexternal").innerHTML = data[1];
+						document.getElementById("bcwu").innerHTML = data[2];
+						document.getElementById("bco").innerHTML = data[3];
+						delete xmlhttp;
+					}				
+				}
+			}
+			var url="/dispatch/mimo/${dispatch}/";
+			xmlhttp.open("POST",url,true);
+			xmlhttp.send(null);				
+			setTimeout("update()", 60000);
+	}
+	</script>
+</head>
+<body>
+	<div id="mainpage">
+	<script type="text/javascript">update();</script>
+	<div class="external" style="background-color: green;">
+		<div class="centrum" id="binternal">${external.getLastRead()[0]}</div></div>
+	<div class="internal"style="background-color: black;">
+		<div class="centrum"  id="bexternal">${internal.getLastRead()[0]}</div></div>
+	<div class="cwu" style="background-color: blue;">
+		<div class="centrum" id="bcwu">${cwu.getLastRead()[0]}</div></div>
+	<div class="co" style="background-color: red;">
+		<div class="centrum" id="bco">${co.getLastRead()[0]}</div></div>
+	</div>		
+</body>
+</html>

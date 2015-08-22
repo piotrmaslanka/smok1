@@ -1,0 +1,12 @@
+# -*- coding: utf-8 -*-
+<%inherit file="/base/introspection.html" />
+<%def name="head()" >
+</%def>
+<%def name="body()" >
+        <form action="/device/sensors/setup/edit/${form.instance.id}/" method="post">
+        <table>
+        ${form.as_table()}
+        <tr><td colspan="2"><input type="submit" value="Zatwierdź"/></td></tr>
+        </table>
+        </form>
+</%def>

@@ -1,0 +1,55 @@
+# coding=UTF-8
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	<title>SMOK - System Monitoringu Oddalonych Kotłowni</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta name="description" content="System monitoringu kotłowni SMOK">
+	<meta name="keywords" lang="pl" content="zdalne zarządzanie modbus system monitoring frisko diematic kotłownia zużycie gazu dietrich rzeszów dedietrich dms internet sterownik TIBBO ">	
+	<style type="text/css">
+		body
+		{
+			background-color: #E0E0E0;
+		}
+		input, button, select
+		{
+			border: 1px solid black;
+			background-color: #E3E3E3;
+		}
+		h1
+		{
+			font-size: 2em;
+			display: inline;
+		}
+		h2 
+		{
+			font-size: 1em;
+			text-align: center;
+			display: inline;
+		}
+		.allclear
+		{
+			border: 0;
+		}
+	</style>
+	${self.head()}
+</head>
+<body>
+	<img src="/media/smokbar.png" style="width: 100%; height: 3em; position: absolute; top: 0; left: 0; z-index: -10;">
+	<h1 style="height: 2.5em;">SMOK</h1> - <h2 style="height: 2em;">System Monitoringu Oddalonych Kotłowni</h2>
+
+	<div style="float: right;">
+<!--  		<form action="/login/login/" method="post">
+			Login: <input type="text" name="login" style="background: orange;">	
+			Hasło: <input type="password" name="password" style="background: orange;"> 
+			<input type="submit" value="Zaloguj" style="margin-left: 1em;">
+		</form>-->
+		<a href="/login/login/">Zaloguj</a>
+	</div>
+	
+	<div style="width: 100%; position: absolute; top: 15%; left: 3%; width: 94%;">
+	${self.body()}
+	</div>
+	
+</body>	
+</html>

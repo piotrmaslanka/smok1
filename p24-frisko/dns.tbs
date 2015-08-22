@@ -1,0 +1,90 @@
+include "global.tbh"
+
+dim dns_status as ok_ng 'status odpowiedzi DNS
+
+sub dns_skip_domainname()			'' pomija nazwê domeny
+		dim bTemp1 as byte
+		while true	' przeczytaj pojedyncz¹ etykietê nazwy DNS - powtarzaj a¿ zczytasz ca³¹ nazwê
+			bTemp1 = asc(sock.getdata(1))
+			
+			if bTemp1 = 0 then				'' czy skoñczyliœmy odczyt?
+				exit while
+			end if
+				
+			if ((bTemp1 and 192)=192) then			'' jeœli to wskaŸnik...
+				sock.getdata(1)		'' to go pomiñ
+				exit while				'' i jednoczeœnie zakoñcz odczyt etykiety DNS
+			else 
+				sock.getdata(bTemp1 and 63)		'' jeœli to nie wskaŸnik, odczytaj etykietê
+			end if
+		wend
+end sub
+
+public function dns_getip() as string		' wypakowuje samo IP z rekordu A
+				'' Parsuj HEADER
+	sock.getdata(4)		' Pomiñ ID, flagi
+	dim wAnswers as word
+	
+	sock.getdata(2)		' Iloœæ QUERY zawsze by³o 1, mo¿esz pomin¹æ
+	wAnswers = asc(sock.getdata(1))*256 + asc(sock.getdata(1))
+	sock.getdata(4)		' Pomiñ iloœæ AUTHORITY i ADDITIONAL
+				'' Parsuj QUERY
+	dns_skip_domainname()	'' Pomiñ Query.Name
+	sock.getdata(4)	' Pomiñ Query.Type i Query.Class
+	
+				'' Parsuj ANSWERS
+	while wAnswers>0
+		dns_skip_domainname()	'' Pomiñ Answer.Name
+		if sock.getdata(2) = "\x00\x01"	then		'' Jeœli to jest rekord A...
+			sock.getdata(8)		'' Pomiñ Answer.Class, Answer.TTL, Answer.DataLength
+			dns_getip = ddstr(sock.getdata(4)) '' Wypakuj IP
+			dns_status = OK
+			exit function					   '' Zakoñcz dzia³anie funkcji
+		end if
+			'' To nie jest rekord A
+			
+		sock.getdata(6)	'' Pomiñ Query.Class, Query.TTL
+		dim wLen as word = asc(sock.getdata(1))*256 + asc(sock.getdata(1))	 '' Zczytaj DataLength
+		sock.getdata(wLen)				'' Pomiñ tyle bajtów
+		wAnswers = wAnswers-1
+	wend
+	
+	dns_status = NG
+end function
+
+
+public sub dns_init_dns() 'zainicjuj DNS-y
+	sock.num = 0
+	sock.txbuffrq(2)
+	sock.rxbuffrq(4)
+	sys.buffalloc()
+	sock.protocol = PL_SOCK_PROTOCOL_UDP
+	sock.inconmode = PL_SOCK_INCONMODE_ANY_IP_ANY_PORT
+	sock.reconmode=PL_SOCK_RECONMODE_3
+	sock.targetip = "208.67.220.220"'eprom_get_pdns()
+	sock.targetport = 53
+	sock.connect()
+end sub
+
+public function dns_query(to_resolve as string) as string 'Skleæ zapytanie i poœlij w œwiat
+	sock.num = 0
+	sock.setdata("\x24\x05\x01\x00\x00\x01\x00\x00\x00\x00\x00\x00")	
+		'' Dodaj Header.ID, Header.Flags, Header.Questions=1, Header.Answers=Header.Authority=Header.Additional=0
+		while true
+		
+			dim dotpos as byte = instr(1, to_resolve, ".", 1)
+			
+			if (dotpos=0) then
+				sock.setdata(chr(len(to_resolve)))
+				sock.setdata(to_resolve)
+				exit while
+			end if
+			
+			sock.setdata(chr(dotpos-1))
+			sock.setdata(left(to_resolve, dotpos-1))
+			
+			to_resolve = right(to_resolve, len(to_resolve)-dotpos)
+		wend
+		sock.setdata("\x00\x00\x01\x00\x01")	'' Zakoñcz nazwê, Query.Type=A, Query.Class=IN
+		sock.send()
+end function

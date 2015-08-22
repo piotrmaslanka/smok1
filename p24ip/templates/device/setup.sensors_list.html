@@ -1,0 +1,29 @@
+# -*- coding: utf-8 -*-
+<%inherit file="/base/introspection.html" />
+<%def name="head()" >
+</%def>
+<%def name="body()" >
+    <table>
+        <tr><th>Nazwa</th><th>Nr MODBUS</th><th>Typ rejestru</th><th>Nr rejestru</th><th></th><th>Stan archiwizacji</th><th>Nr sortowania</th></tr>
+    % for sensor in sensors:
+        <tr>
+        <td><a href="/device/sensors/setup/edit/${sensor.id}/">${sensor.name}</a></td>
+        <td>${sensor.modbus_devid}</td>
+        <td>${sensor.regtype}</td>
+        <td>${sensor.register}</td>
+        <td><a href="/device/sensors/setup/delete/${sensor.id}/">Kasuj</a></td>
+        <td>
+        	% if len(sensor.archsensor_set.all()) == 0:
+        		<a href="/arch/setup/make/${sensor.id}/">Nie archiwizuję</a>
+        	% else:
+        		<a href="/arch/setup/unmake/${sensor.id}/">Archiwizuję</a>
+        	% endif
+		<td>${sensor.sorting}</td>        	
+        </tr>
+    % endfor
+    </table>
+    <hr>
+    <a href="/device/sensors/setup/save/">Zapisz i zastosuj zmiany</a><br>
+    <a href="/device/sensors/setup/new/">Dodaj sensor</a><br>
+    <a href="/arch/setup/save/">Zapisz i zastosuj zmiany archiwizacji</a><br>
+</%def>

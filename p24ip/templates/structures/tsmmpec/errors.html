@@ -1,0 +1,15 @@
+# -*- coding: utf-8 -*-
+<%inherit file="/base/introspection.html" />
+<%def name="head()" >
+</%def>
+<%def name="body()" >
+	<h1>CO</h1>
+	Średni błąd względny: ${errRCO*100}%<br>
+	Średni błąd bezwzględny: ${errACO}<br>
+	Referencyjna: ${errFCO}<br>
+
+	<h1>CW</h1>
+	Średni błąd względny: ${errRCW*100}%<br>
+	Średni błąd bezwzględny: ${errACW}<br>
+	Referencyjna: ${errFCW}<br>
+</%def>

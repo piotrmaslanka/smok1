@@ -1,0 +1,463 @@
+include "global.tbh"
+
+dim crc_tab(256) as word 'Tabelka do liczenia CRC
+
+
+dim modbus_msg as string  ' Aktualna wiadomoœæ MODBUS
+dim modbus_state as modbus_status ' Status ostatniej operacji 
+
+
+sub modbus_init() 'Inicjuje tabele do liczenia CRC
+	crc_tab(0) = 0
+	crc_tab(1) = 49345
+	crc_tab(2) = 49537
+	crc_tab(3) = 320
+	crc_tab(4) = 49921
+	crc_tab(5) = 960
+	crc_tab(6) = 640
+	crc_tab(7) = 49729
+	crc_tab(8) = 50689
+	crc_tab(9) = 1728
+	crc_tab(10) = 1920
+	crc_tab(11) = 51009
+	crc_tab(12) = 1280
+	crc_tab(13) = 50625
+	crc_tab(14) = 50305
+	crc_tab(15) = 1088
+	crc_tab(16) = 52225
+	crc_tab(17) = 3264
+	crc_tab(18) = 3456
+	crc_tab(19) = 52545
+	crc_tab(20) = 3840
+	crc_tab(21) = 53185
+	crc_tab(22) = 52865
+	crc_tab(23) = 3648
+	crc_tab(24) = 2560
+	crc_tab(25) = 51905
+	crc_tab(26) = 52097
+	crc_tab(27) = 2880
+	crc_tab(28) = 51457
+	crc_tab(29) = 2496
+	crc_tab(30) = 2176
+	crc_tab(31) = 51265
+	crc_tab(32) = 55297
+	crc_tab(33) = 6336
+	crc_tab(34) = 6528
+	crc_tab(35) = 55617
+	crc_tab(36) = 6912
+	crc_tab(37) = 56257
+	crc_tab(38) = 55937
+	crc_tab(39) = 6720
+	crc_tab(40) = 7680
+	crc_tab(41) = 57025
+	crc_tab(42) = 57217
+	crc_tab(43) = 8000
+	crc_tab(44) = 56577
+	crc_tab(45) = 7616
+	crc_tab(46) = 7296
+	crc_tab(47) = 56385
+	crc_tab(48) = 5120
+	crc_tab(49) = 54465
+	crc_tab(50) = 54657
+	crc_tab(51) = 5440
+	crc_tab(52) = 55041
+	crc_tab(53) = 6080
+	crc_tab(54) = 5760
+	crc_tab(55) = 54849
+	crc_tab(56) = 53761
+	crc_tab(57) = 4800
+	crc_tab(58) = 4992
+	crc_tab(59) = 54081
+	crc_tab(60) = 4352
+	crc_tab(61) = 53697
+	crc_tab(62) = 53377
+	crc_tab(63) = 4160
+	crc_tab(64) = 61441
+	crc_tab(65) = 12480
+	crc_tab(66) = 12672
+	crc_tab(67) = 61761
+	crc_tab(68) = 13056
+	crc_tab(69) = 62401
+	crc_tab(70) = 62081
+	crc_tab(71) = 12864
+	crc_tab(72) = 13824
+	crc_tab(73) = 63169
+	crc_tab(74) = 63361
+	crc_tab(75) = 14144
+	crc_tab(76) = 62721
+	crc_tab(77) = 13760
+	crc_tab(78) = 13440
+	crc_tab(79) = 62529
+	crc_tab(80) = 15360
+	crc_tab(81) = 64705
+	crc_tab(82) = 64897
+	crc_tab(83) = 15680
+	crc_tab(84) = 65281
+	crc_tab(85) = 16320
+	crc_tab(86) = 16000
+	crc_tab(87) = 65089
+	crc_tab(88) = 64001
+	crc_tab(89) = 15040
+	crc_tab(90) = 15232
+	crc_tab(91) = 64321
+	crc_tab(92) = 14592
+	crc_tab(93) = 63937
+	crc_tab(94) = 63617
+	crc_tab(95) = 14400
+	crc_tab(96) = 10240
+	crc_tab(97) = 59585
+	crc_tab(98) = 59777
+	crc_tab(99) = 10560
+	crc_tab(100) = 60161
+	crc_tab(101) = 11200
+	crc_tab(102) = 10880
+	crc_tab(103) = 59969
+	crc_tab(104) = 60929
+	crc_tab(105) = 11968
+	crc_tab(106) = 12160
+	crc_tab(107) = 61249
+	crc_tab(108) = 11520
+	crc_tab(109) = 60865
+	crc_tab(110) = 60545
+	crc_tab(111) = 11328
+	crc_tab(112) = 58369
+	crc_tab(113) = 9408
+	crc_tab(114) = 9600
+	crc_tab(115) = 58689
+	crc_tab(116) = 9984
+	crc_tab(117) = 59329
+	crc_tab(118) = 59009
+	crc_tab(119) = 9792
+	crc_tab(120) = 8704
+	crc_tab(121) = 58049
+	crc_tab(122) = 58241
+	crc_tab(123) = 9024
+	crc_tab(124) = 57601
+	crc_tab(125) = 8640
+	crc_tab(126) = 8320
+	crc_tab(127) = 57409
+	crc_tab(128) = 40961
+	crc_tab(129) = 24768
+	crc_tab(130) = 24960
+	crc_tab(131) = 41281
+	crc_tab(132) = 25344
+	crc_tab(133) = 41921
+	crc_tab(134) = 41601
+	crc_tab(135) = 25152
+	crc_tab(136) = 26112
+	crc_tab(137) = 42689
+	crc_tab(138) = 42881
+	crc_tab(139) = 26432
+	crc_tab(140) = 42241
+	crc_tab(141) = 26048
+	crc_tab(142) = 25728
+	crc_tab(143) = 42049
+	crc_tab(144) = 27648
+	crc_tab(145) = 44225
+	crc_tab(146) = 44417
+	crc_tab(147) = 27968
+	crc_tab(148) = 44801
+	crc_tab(149) = 28608
+	crc_tab(150) = 28288
+	crc_tab(151) = 44609
+	crc_tab(152) = 43521
+	crc_tab(153) = 27328
+	crc_tab(154) = 27520
+	crc_tab(155) = 43841
+	crc_tab(156) = 26880
+	crc_tab(157) = 43457
+	crc_tab(158) = 43137
+	crc_tab(159) = 26688
+	crc_tab(160) = 30720
+	crc_tab(161) = 47297
+	crc_tab(162) = 47489
+	crc_tab(163) = 31040
+	crc_tab(164) = 47873
+	crc_tab(165) = 31680
+	crc_tab(166) = 31360
+	crc_tab(167) = 47681
+	crc_tab(168) = 48641
+	crc_tab(169) = 32448
+	crc_tab(170) = 32640
+	crc_tab(171) = 48961
+	crc_tab(172) = 32000
+	crc_tab(173) = 48577
+	crc_tab(174) = 48257
+	crc_tab(175) = 31808
+	crc_tab(176) = 46081
+	crc_tab(177) = 29888
+	crc_tab(178) = 30080
+	crc_tab(179) = 46401
+	crc_tab(180) = 30464
+	crc_tab(181) = 47041
+	crc_tab(182) = 46721
+	crc_tab(183) = 30272
+	crc_tab(184) = 29184
+	crc_tab(185) = 45761
+	crc_tab(186) = 45953
+	crc_tab(187) = 29504
+	crc_tab(188) = 45313
+	crc_tab(189) = 29120
+	crc_tab(190) = 28800
+	crc_tab(191) = 45121
+	crc_tab(192) = 20480
+	crc_tab(193) = 37057
+	crc_tab(194) = 37249
+	crc_tab(195) = 20800
+	crc_tab(196) = 37633
+	crc_tab(197) = 21440
+	crc_tab(198) = 21120
+	crc_tab(199) = 37441
+	crc_tab(200) = 38401
+	crc_tab(201) = 22208
+	crc_tab(202) = 22400
+	crc_tab(203) = 38721
+	crc_tab(204) = 21760
+	crc_tab(205) = 38337
+	crc_tab(206) = 38017
+	crc_tab(207) = 21568
+	crc_tab(208) = 39937
+	crc_tab(209) = 23744
+	crc_tab(210) = 23936
+	crc_tab(211) = 40257
+	crc_tab(212) = 24320
+	crc_tab(213) = 40897
+	crc_tab(214) = 40577
+	crc_tab(215) = 24128
+	crc_tab(216) = 23040
+	crc_tab(217) = 39617
+	crc_tab(218) = 39809
+	crc_tab(219) = 23360
+	crc_tab(220) = 39169
+	crc_tab(221) = 22976
+	crc_tab(222) = 22656
+	crc_tab(223) = 38977
+	crc_tab(224) = 34817
+	crc_tab(225) = 18624
+	crc_tab(226) = 18816
+	crc_tab(227) = 35137
+	crc_tab(228) = 19200
+	crc_tab(229) = 35777
+	crc_tab(230) = 35457
+	crc_tab(231) = 19008
+	crc_tab(232) = 19968
+	crc_tab(233) = 36545
+	crc_tab(234) = 36737
+	crc_tab(235) = 20288
+	crc_tab(236) = 36097
+	crc_tab(237) = 19904
+	crc_tab(238) = 19584
+	crc_tab(239) = 35905
+	crc_tab(240) = 17408
+	crc_tab(241) = 33985
+	crc_tab(242) = 34177
+	crc_tab(243) = 17728
+	crc_tab(244) = 34561
+	crc_tab(245) = 18368
+	crc_tab(246) = 18048
+	crc_tab(247) = 34369
+	crc_tab(248) = 33281
+	crc_tab(249) = 17088
+	crc_tab(250) = 17280
+	crc_tab(251) = 33601
+	crc_tab(252) = 16640
+	crc_tab(253) = 33217
+	crc_tab(254) = 32897
+	crc_tab(255) = 16448
+	
+	ser.num=0 'Ustaw parametry szeregowca
+	ser.flowcontrol=DISABLED
+	ser.Interchardelay=4				
+	ser.baudrate=ser.div9600/1
+	
+	ser.rxbuffrq(4) 'Zaalokuj bufory
+	ser.txbuffrq(4)	
+	sys.buffalloc()
+
+	ser.enabled=YES 'No i za³¹cz szeregowca :)
+end sub
+
+
+function fast_verify(msg as string, pos as byte, desired as byte) as boolean
+	if asc(mid(msg,pos,1)) <> desired then
+		fast_verify = true
+		modbus_state = MODBUS_CHECKSUM
+	else
+		fast_verify = false
+	end if
+end function
+
+function calculate_checksum(msg as string) as string(2) ' Liczy sumê kontroln¹ wiadomoœci
+	dim private_copy as string = msg
+	dim crc as word = 65535
+	while true	' MAGIA !
+		crc = (crc / 256) xor crc_tab((crc xor asc(private_copy)) and 255)
+		if len(private_copy) = 1 then
+			exit while
+		end if
+		private_copy = right(private_copy, len(private_copy)-1)
+	wend 
+	
+	dim reverse_crc as boolean = false
+	if reverse_crc then
+		calculate_checksum = chr(crc / 256) + chr(crc and 255)
+	else
+		calculate_checksum = chr(crc and 255) + chr(crc / 256)
+	end if
+	
+end function
+
+sub modbus_send_message() ' Wysy³a wiadomoœæ MODBUS po kablu
+	ser.num = 0
+	ser.setdata(modbus_msg + calculate_checksum(modbus_msg))	
+	ser.send()
+end sub
+
+
+function modbus_read_holding_single(device as byte, id as word) as word
+	ser.rxclear()
+	modbus_msg = chr(device) + ddval("3") + chr(id / 256) + chr(id and 255) + ddval("0.1")
+	modbus_send_message()	
+	dim timer as word = sys.timercount
+	watchdog_feed()
+	while ser.rxlen < 7 
+		doevents
+		if sys.timercount - timer > 2 then
+			modbus_state = MODBUS_TIMEOUT
+			exit function
+		end if
+	wend
+	dim x as string(5)
+	x = ser.getdata(5)
+	if calculate_checksum(x) <> ser.getdata(2) then
+		modbus_state = MODBUS_CHECKSUM
+		exit function
+	end if
+
+	if fast_verify(x, 1, device) then	' Odpowiedz przychodzi od odpowiedniego urzadzenia
+		exit function
+	end if
+	if fast_verify(x, 2, 3) then	' Odpowiedz na Read Holding
+		exit function
+	end if
+	
+	modbus_state = MODBUS_OK
+	x = right(x, 2)
+	modbus_read_holding_single = asc(x)*256 + asc(right(x,1))
+end function
+
+sub modbus_write_holding_single(device as byte, id as word, data as word)
+	ser.rxclear()
+	modbus_msg = chr(device)+ ddval("6") + chr(id / 256) + chr(id and 255) + chr(data / 256) + chr(data and 255)	
+	modbus_send_message()	
+	watchdog_feed()	
+	dim timer as word = sys.timercount
+	while ser.rxlen < 8 
+		doevents
+		if sys.timercount - timer > 2 then
+			modbus_state = MODBUS_TIMEOUT
+			exit sub
+		end if
+	wend
+	dim x as string(6)
+	x = ser.getdata(6)
+	if calculate_checksum(x) <> ser.getdata(2) then
+		modbus_state = MODBUS_CHECKSUM
+		exit sub
+	end if
+	if fast_verify(x, 1, device) then	' Odpowiedz przychodzi od odpowiedniego urzadzenia
+		exit sub
+	end if
+	if fast_verify(x, 2, 6) then	' Odpowiedz na Write Holding
+		exit sub
+	end if
+	modbus_state = MODBUS_OK
+end sub
+
+sub modbus_write_coil_single(device as byte, id as word, data as byte)
+	ser.rxclear()
+	if data = 1 then
+		modbus_msg = chr(device)+ ddval("5") + chr(id / 256) + chr(id and 255) + ddval("255.0")
+	else
+		modbus_msg = chr(device)+ ddval("5") + chr(id / 256) + chr(id and 255) + ddval("0.0")	
+	end if
+	modbus_send_message()	
+	watchdog_feed()	
+	dim timer as word = sys.timercount
+	while ser.rxlen < 8 
+		doevents
+		if sys.timercount - timer > 2 then
+			modbus_state = MODBUS_TIMEOUT
+			exit sub
+		end if
+	wend
+	dim x as string(6)
+	x = ser.getdata(6)
+
+	if calculate_checksum(x) <> ser.getdata(2) then
+		modbus_state = MODBUS_CHECKSUM
+		exit sub
+	end if
+	if fast_verify(x, 1, device) then	' Odpowiedz przychodzi od odpowiedniego urzadzenia
+		exit sub
+	end if
+	if fast_verify(x, 2, 5) then	' Odpowiedz na Write Coil
+		exit sub
+	end if	
+	modbus_state = MODBUS_OK
+end sub
+
+
+function modbus_read_coil_single(device as byte, id as word) as byte
+' Jest zrobione dziwnie gdyz Pewien Producent Sterownikow nie pomyslal zawczasu :(
+	dim trimmed_id as word = id and 65528	' czyli id and 1111 1111 1111 1000
+
+	modbus_msg = chr(device) + ddval("1") + chr(trimmed_id / 256) + chr(trimmed_id and 255) + ddval("0.8")
+	ser.rxclear()
+	modbus_send_message()	
+	watchdog_feed()	
+	dim timer as word = sys.timercount
+	while ser.rxlen < 6 
+		doevents
+		if sys.timercount - timer > 2 then
+			modbus_state = MODBUS_TIMEOUT
+			exit function
+		end if
+	wend
+	dim x as string(4)
+	x = ser.getdata(4)
+	if calculate_checksum(x) <> ser.getdata(2) then
+		modbus_state = MODBUS_CHECKSUM
+		exit function
+	end if
+	
+	
+	if fast_verify(x, 1, device) then	' Odpowiedz przychodzi od odpowiedniego urzadzenia
+		exit function
+	end if
+	if fast_verify(x, 2, 1) then	' Odpowiedz na Read Coil
+		exit function
+	end if
+	
+	modbus_state = MODBUS_OK
+	
+	dim bResult as byte
+	
+	bResult = asc(right(x, 1))
+	
+	while trimmed_id < id 
+		' Wycofaj tak, zeby pierwszy bit bResult byl poszukiwanym wynikiem
+		bResult = (bResult and 254) / 2				'' czyli bResult and 1111 1110 i potem shift right
+		trimmed_id = trimmed_id + 1
+	wend
+
+	modbus_read_coil_single = bResult and 1
+	
+end function
+
+sub modbus_serial_reset()
+	ser.enabled = NO
+	ser.txclear()
+	ser.rxclear()
+	ser.enabled = YES
+end sub

@@ -1,0 +1,18 @@
+'	(c) by Tusiek Technologies
+'	2007-2009 a subsidiary of Owczarek Niemiecki Co.
+'	Watchdog dzia³a, jeœli podczas czekania wywo³uje siê doevents
+
+dim watchdog_started as word 'Kiedy wystartowaliœmy
+dim watchdog_interval as word = 60 'Bez nakarmienia po tym czasie system siê resetnie
+dim watchdog_enabled as boolean = false 'Czy watchdog w³¹czony
+
+sub watchdog_feed() 'Nakarm watchdoga Royal Pulsin
+	watchdog_started = sys.timercount
+end sub
+
+sub watchdog_do() 'Wywo³aj to w on_sys_timer
+	if watchdog_enabled = false then
+		exit sub end if
+	if (sys.timercount - watchdog_started) > watchdog_interval then	
+		sys.reboot() end if
+end sub
