@@ -12,6 +12,10 @@ Waiting for release, in some very very far future, are SMOK2 and SMOK3.
 
 Current version, SMOK4, uses very elegant code and design, something entirely unlike it. Beware :>
 
+Update
+======
+Presently it's being updated to SMOK5, which is a fully observable, replicable, distributed, no-SPoF, microservice and CI/CD-based system. There is right now about 600 pages of technical documentation for that.
+
 Certain image files (c) Frisko.
 
 My wild guesses as to what certain things are
